@@ -1,3 +1,3 @@
-### ReGreen
+# ReGreen
 ## Bank Sampah Digital
-# Ubah Sampahmu Menjadi Cuan
+### Ubah Sampahmu Menjadi Cuan
