@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:regreen/onboarding/onboarding_page.dart';
+import 'package:regreen/auth/login_screen.dart';
 
-const Color kOnboardingBackground = Color(0xFFF0F2EE);
+const Color kOnboardingBackground = Color(0xFFE8EDDE);
 const Color kGreenButton = Color(0xFF7A9B7A);
 const Color kGreenText = Color(0xFF3B5B4F);
 const Color kIndicatorInactive = Color(0xFFD9E0D9);
@@ -36,7 +37,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void goToNextScreen() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const Placeholder()),
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
     );
   }
 
