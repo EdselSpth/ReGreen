@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'register_screen.dart';
 import 'package:regreen/widget/custom_textfeld.dart';
+import 'package:regreen/forgetpassword/emailverification.dart';
 
 const Color kBackground = Color(0xFFE8EDDE);
 const Color kGreenButton = Color(0xFF548A3C);
@@ -105,7 +106,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ],
                     ),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const EmailVerifikasiPage(),
+                          ),
+                        );
+                      },
                       child: const Text(
                         'Lupa Sandi',
                         style: TextStyle(
