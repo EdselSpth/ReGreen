@@ -91,9 +91,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      final email = _emailController.text;
-                      final password = _passwordController.text;
-                      print('Login attempt: $email / $password');
+                      // Logika pendaftaran akan ditambahkan di sini
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kGreenButton,
@@ -103,7 +101,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     child: const Text(
-                      'Login',
+                      'Daftar',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,

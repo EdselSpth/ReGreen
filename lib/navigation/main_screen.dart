@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:google_nav_bar/google_nav_bar.dart';
+import 'package:regreen/navigation/home_page.dart';
+
+const Color kGreenButton = Color(0xFF6B8E23);
+const Color kPageBackground = Color(0xFFF0F0E8);
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -11,48 +14,49 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  static const List<Widget> _widgetOptions = <Widget>[
-    Placeholder(), // Home Screen
-    Placeholder(), // Search Screen
-    Placeholder(), // Profile Screen
-  ];
+  final List<Widget> _pages = [HomePage(), Placeholder(), Placeholder()];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
-  Widget build(BuildContext) {
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF0F0E8),
+      backgroundColor: kPageBackground,
 
-      body: _widgetOptions.elementAt(_selectedIndex),
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.symmetric(horizontal: 40, vertical: 30),
-        decoration: BoxDecoration(
-          color: Color(0xFF6B8E23),
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(blurRadius: 10, color: Colors.black.withOpacity(0.1)),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
-          child: GNav(
-            color: Colors.grey[300],
-            activeColor: Colors.black,
-            tabBackgroundColor: Colors.grey[200]!,
-            padding: EdgeInsets.all(12),
-            gap: 8,
-            tabs: const [
-              GButton(icon: Icons.home),
-              GButton(icon: Icons.calendar_today_outlined),
-              GButton(icon: Icons.person_outline),
-            ],
-            selectedIndex: _selectedIndex,
-            onTabChange: (index) {
-              setState(() {
-                _selectedIndex = index;
-              });
-            },
+      body: Center(child: _pages.elementAt(_selectedIndex)),
+      bottomNavigationBar: BottomNavigationBar(
+        // --- PERBAIKAN DI SINI ---
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home_outlined),
+            label: 'Home', // Label ditambahkan
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month_outlined),
+            label: 'Riwayat', // Label ditambahkan
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_outline),
+            label: 'Profil', // Label ditambahkan
+          ),
+        ],
+
+        // -------------------------
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+
+        selectedIconTheme: const IconThemeData(color: kGreenButton),
+        unselectedIconTheme: const IconThemeData(color: Colors.grey),
+        selectedItemColor: kGreenButton, // Ini akan mewarnai label yang aktif
+
+        type: BottomNavigationBarType.fixed,
+
+        backgroundColor: Colors.white,
+        elevation: 5.0,
       ),
     );
   }
