@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:regreen/navigation/home_page.dart';
+import 'package:regreen/navigation/schedule_page.dart';
 
 const Color kGreenButton = Color(0xFF6B8E23);
 const Color kPageBackground = Color(0xFFF0F0E8);
@@ -14,7 +15,7 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _pages = [HomePage(), Placeholder(), Placeholder()];
+  final List<Widget> _pages = [HomePage(), SchedulePage(), Placeholder()];
 
   void _onItemTapped(int index) {
     setState(() {
