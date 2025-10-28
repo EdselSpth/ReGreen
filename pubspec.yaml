@@ -21,3 +21,5 @@ flutter:
   assets:
     - Assets/
     - Assets/onboarding/
+    - Assets/profile.jpg
+    - Assets/kurir.jpg
