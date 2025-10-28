@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:regreen/auth/login_screen.dart';
+import 'package:regreen/forgetpassword/codeverification.dart';
 
 class EmailVerifikasiPage extends StatelessWidget {
   const EmailVerifikasiPage({super.key});
@@ -104,7 +105,14 @@ class EmailVerifikasiPage extends StatelessWidget {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CodeVerificationPage(),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF5C8D4C),
                       shape: RoundedRectangleBorder(
