@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:regreen/navigation/main_screen.dart';
 import 'register_screen.dart';
 import 'package:regreen/widget/custom_textfeld.dart';
 import 'package:regreen/forgetpassword/emailverification.dart';
@@ -130,9 +131,13 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      final email = _emailController.text;
-                      final password = _passwordController.text;
-                      print('Login attempt: $email / $password');
+                      // Logika login akan ditambahkan di sini
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MainScreen(),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kGreenButton,

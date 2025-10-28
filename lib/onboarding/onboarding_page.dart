@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Ambil warna teks dari desain
 const Color kGreenText = Color(0xFF3B5B4F);
 
 class OnboardingPageContent extends StatelessWidget {
