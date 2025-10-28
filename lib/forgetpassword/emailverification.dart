@@ -8,7 +8,7 @@ class EmailVerifikasiPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEFF3E5), // Warna latar belakang lembut
+      backgroundColor: const Color(0xFFEFF3E5),
       body: SafeArea(
         child: Center(
           child: Padding(
@@ -17,7 +17,6 @@ class EmailVerifikasiPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Logo dan Judul
                 Text.rich(
                   TextSpan(
                     children: [
@@ -42,7 +41,6 @@ class EmailVerifikasiPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 30),
 
-                // Icon Key (bisa diganti dengan Image.asset jika ada)
                 Column(
                   children: [
                     const Text(
