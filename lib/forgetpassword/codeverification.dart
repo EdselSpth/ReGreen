@@ -10,7 +10,7 @@ class CodeVerificationPage extends StatefulWidget {
 
 class _CodeVerificationPageState extends State<CodeVerificationPage> {
   final _controllers =
-      List.generate(4, (index) => TextEditingController()); // 4 digit input
+      List.generate(4, (index) => TextEditingController());
 
   @override
   void dispose() {
@@ -58,7 +58,7 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
 
               const SizedBox(height: 30),
 
-              // Icon amplop (email)
+              // Icon Mail
               const Icon(
                 Icons.mark_email_unread_rounded,
                 color: Color(0xFF7CB342),
@@ -108,9 +108,9 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                       ),
                       onChanged: (value) {
                         if (value.isNotEmpty && index < 3) {
-                          FocusScope.of(context).nextFocus(); // otomatis pindah ke kotak berikut
+                          FocusScope.of(context).nextFocus(); 
                         } else if (value.isEmpty && index > 0) {
-                          FocusScope.of(context).previousFocus(); // balik ke kotak sebelumnya
+                          FocusScope.of(context).previousFocus(); 
                         }
                       },
                     ),
@@ -152,7 +152,6 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
 
               const SizedBox(height: 24),
 
-              // Link Kirim ulang kode
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -166,7 +165,6 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // TODO: aksi kirim ulang kode
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Kode dikirim ulang')),
                       );
