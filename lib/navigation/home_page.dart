@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:regreen/penarikan_keuntungan/penarikan_keuntungan_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -33,10 +34,7 @@ class HomePage extends StatelessWidget {
                       ),
                       Text(
                         'Mau Setor Apa Hari Ini?',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 15,
-                        ),
+                        style: TextStyle(color: Colors.white70, fontSize: 15),
                       ),
                     ],
                   ),
@@ -56,7 +54,10 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 30),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 26,
+                    vertical: 30,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -90,15 +91,27 @@ class HomePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            Container(
-                              decoration: const BoxDecoration(
-                                color: Color(0xFF558B3E),
-                                shape: BoxShape.circle,
-                              ),
-                              padding: const EdgeInsets.all(8),
-                              child: const Icon(
-                                Icons.arrow_forward,
-                                color: Colors.white,
+                            //bagian navigasi icon forward penarikan keuntungan
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const PenarikanKeuntunganPage(),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFF558B3E),
+                                  shape: BoxShape.circle,
+                                ),
+                                padding: const EdgeInsets.all(8),
+                                child: const Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ],
@@ -153,12 +166,20 @@ class HomePage extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(height: 4),
-                                  const Text('07:00 - 09:00',
-                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                  const Text(
+                                    '07:00 - 09:00',
+                                    style: TextStyle(
+                                      fontSize: 15,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   const SizedBox(height: 4),
                                   const Text(
                                     'Sampah : Organik, Plastik\nKurir : Abdul Azis Saepurohmat',
-                                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   const SizedBox(height: 6),
                                   Container(
@@ -167,7 +188,9 @@ class HomePage extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     padding: const EdgeInsets.symmetric(
-                                        vertical: 4, horizontal: 8),
+                                      vertical: 4,
+                                      horizontal: 8,
+                                    ),
                                     child: const Text(
                                       'Terdaftar',
                                       style: TextStyle(
@@ -247,7 +270,9 @@ class HomePage extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 32, vertical: 12),
+                                  horizontal: 32,
+                                  vertical: 12,
+                                ),
                               ),
                               onPressed: () {},
                               child: const Text(
@@ -257,7 +282,7 @@ class HomePage extends StatelessWidget {
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                            )
+                            ),
                           ],
                         ),
                       ),
@@ -289,10 +314,7 @@ Widget _actionButton({required IconData icon, required String label}) {
         Text(
           label,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 13,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
         ),
       ],
     ),
