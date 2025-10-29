@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:regreen/auth/login_screen.dart';
 
 class ResetPasswordMain extends StatelessWidget {
   const ResetPasswordMain({super.key});
@@ -17,28 +18,28 @@ class ResetPasswordMain extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Logo ReGreen
-              Text.rich(
-                TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Re',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF3B7C87),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Re',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF3B7C87),
+                        ),
                       ),
-                    ),
-                    const TextSpan(
-                      text: 'Green',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF5C8D4C),
+                      const TextSpan(
+                        text: 'Green',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF5C8D4C),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
 
                 const SizedBox(height: 30),
 
@@ -79,7 +80,9 @@ class ResetPasswordMain extends StatelessWidget {
                       borderSide: BorderSide.none,
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 20),
+                      vertical: 16,
+                      horizontal: 20,
+                    ),
                   ),
                 ),
 
@@ -101,7 +104,9 @@ class ResetPasswordMain extends StatelessWidget {
                       borderSide: BorderSide.none,
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                        vertical: 16, horizontal: 20),
+                      vertical: 16,
+                      horizontal: 20,
+                    ),
                   ),
                 ),
 
@@ -119,7 +124,41 @@ class ResetPasswordMain extends StatelessWidget {
                       ),
                     ),
                     onPressed: () {
-                      
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          title: const Text(
+                            "Password Anda telah berhasil diubah.",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF5C8D4C),
+                            ),
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const LoginScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                "OK",
+                                style: TextStyle(
+                                  color: Color(0xFF5C8D4C),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
                     },
                     child: const Text(
                       'Konfirmasi',
