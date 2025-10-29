@@ -10,7 +10,7 @@ class ProfilePage extends StatelessWidget {
         title: const Text('Profil Pengguna'),
         backgroundColor: const Color(
           0xFF7F9F4F,
-        ), // Warna hijau dari desain Figma
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
