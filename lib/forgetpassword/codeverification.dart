@@ -39,15 +39,15 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                     TextSpan(
                       text: 'Re',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blueGrey[700],
+                        color: Color(0xFF3B7C87),
                       ),
                     ),
                     const TextSpan(
                       text: 'Green',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF5C8D4C),
                       ),
@@ -86,11 +86,12 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                   4,
                   (index) => SizedBox(
                     width: 60,
-                    height: 60,
+                    height: 50,
                     child: TextField(
                       controller: _controllers[index],
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
+                      textAlignVertical: TextAlignVertical.center,
                       maxLength: 1,
                       decoration: InputDecoration(
                         counterText: "",
@@ -100,9 +101,10 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
+                        contentPadding: EdgeInsets.zero
                       ),
                       style: const TextStyle(
-                        fontSize: 24,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),

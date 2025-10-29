@@ -23,15 +23,15 @@ class ResetPasswordMain extends StatelessWidget {
                     TextSpan(
                       text: 'Re',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blueGrey[700],
+                        color: Color(0xFF3B7C87),
                       ),
                     ),
                     const TextSpan(
                       text: 'Green',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF5C8D4C),
                       ),

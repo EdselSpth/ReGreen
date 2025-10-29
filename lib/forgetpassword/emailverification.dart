@@ -23,7 +23,7 @@ class EmailVerifikasiPage extends StatelessWidget {
                       TextSpan(
                         text: 'Re',
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF3B7C87),
                         ),
@@ -31,7 +31,7 @@ class EmailVerifikasiPage extends StatelessWidget {
                       const TextSpan(
                         text: 'Green',
                         style: TextStyle(
-                          fontSize: 28,
+                          fontSize: 32,
                           fontWeight: FontWeight.bold,
                           color: Color(0xFF5C8D4C),
                         ),
@@ -66,6 +66,7 @@ class EmailVerifikasiPage extends StatelessWidget {
                   "Silakan isi email yang\nterdaftar untuk verifikasi",
                   textAlign: TextAlign.center,
                   style: TextStyle(
+                    fontFamily: 'sans-serif',
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Colors.black87,
@@ -76,12 +77,14 @@ class EmailVerifikasiPage extends StatelessWidget {
 
                 // Input Email
                 TextField(
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.done,
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color(0xFFDCE1CF),
                     hintText: "Email",
                     hintStyle: const TextStyle(
-                      color: Colors.grey,
+                      color: const Color(0xFF3E403A),
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
