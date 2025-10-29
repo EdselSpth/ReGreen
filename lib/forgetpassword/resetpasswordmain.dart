@@ -70,7 +70,7 @@ class ResetPasswordMain extends StatelessWidget {
                     hintText: "Password Baru",
                     hintStyle: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.black54,
+                      color: const Color(0xFF3E403A),
                     ),
                     filled: true,
                     fillColor: const Color(0xFFD8DDCD),
@@ -92,7 +92,7 @@ class ResetPasswordMain extends StatelessWidget {
                     hintText: "Konfirmasi Password Baru",
                     hintStyle: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.black54,
+                      color: const Color(0xFF3E403A),
                     ),
                     filled: true,
                     fillColor: const Color(0xFFD8DDCD),
@@ -113,7 +113,7 @@ class ResetPasswordMain extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF5E7C47),
+                      backgroundColor: const Color(0xFF558B3E),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
                       ),
