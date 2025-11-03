@@ -1,8 +1,78 @@
 import 'package:flutter/material.dart';
 import 'package:regreen/auth/login_screen.dart';
 
-class ResetPasswordMain extends StatelessWidget {
+class ResetPasswordMain extends StatefulWidget {
   const ResetPasswordMain({super.key});
+
+  @override
+  State<ResetPasswordMain> createState() => _ResetPasswordMainState();
+}
+
+class _ResetPasswordMainState extends State<ResetPasswordMain> {
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmController = TextEditingController();
+
+  void _konfirmasiPassword() {
+    String password = _passwordController.text.trim();
+    String konfirmasi = _confirmController.text.trim();
+
+    // Validasi isi kolom
+    if (password.isEmpty || konfirmasi.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Semua kolom harus diisi!"),
+          backgroundColor: Colors.redAccent,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Validasi kesamaan password
+    if (password != konfirmasi) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Password dan konfirmasi tidak sama!"),
+          backgroundColor: Colors.redAccent,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Jika valid, tampilkan snackbar sukses lalu arahkan ke login
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Password Anda berhasil diubah."),
+        backgroundColor: Colors.green,
+        duration: Duration(seconds: 2),
+      ),
+    );
+
+    // Delay sedikit agar snackbar tampil dulu sebelum pindah
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    });
+  }
+
+  void _batalkan() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const LoginScreen(),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,12 +136,13 @@ class ResetPasswordMain extends StatelessWidget {
 
                 // Input Password Baru
                 TextField(
+                  controller: _passwordController,
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: "Password Baru",
                     hintStyle: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF3E403A),
+                      color: Color(0xFF3E403A),
                     ),
                     filled: true,
                     fillColor: const Color(0xFFD8DDCD),
@@ -90,12 +161,13 @@ class ResetPasswordMain extends StatelessWidget {
 
                 // Input Konfirmasi Password
                 TextField(
+                  controller: _confirmController,
                   obscureText: true,
                   decoration: InputDecoration(
                     hintText: "Konfirmasi Password Baru",
                     hintStyle: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF3E403A),
+                      color: Color(0xFF3E403A),
                     ),
                     filled: true,
                     fillColor: const Color(0xFFD8DDCD),
@@ -123,43 +195,7 @@ class ResetPasswordMain extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
-                      showDialog(
-                        context: context,
-                        builder: (context) => AlertDialog(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          title: const Text(
-                            "Password Anda telah berhasil diubah.",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF5C8D4C),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const LoginScreen(),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                "OK",
-                                style: TextStyle(
-                                  color: Color(0xFF5C8D4C),
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                    onPressed: _konfirmasiPassword,
                     child: const Text(
                       'Konfirmasi',
                       style: TextStyle(
@@ -184,15 +220,16 @@ class ResetPasswordMain extends StatelessWidget {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: const Text(
-                      'Batalkan',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                        color: Colors.white,
+                    onPressed: _batalkan,
+                    child: const Center(
+                      child: Text(
+                        'Batalkan',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ),
