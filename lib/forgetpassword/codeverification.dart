@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // <-- Tambahkan ini
 import 'package:regreen/forgetpassword/resetpasswordmain.dart';
 
 class CodeVerificationPage extends StatefulWidget {
@@ -9,8 +10,7 @@ class CodeVerificationPage extends StatefulWidget {
 }
 
 class _CodeVerificationPageState extends State<CodeVerificationPage> {
-  final _controllers =
-      List.generate(4, (index) => TextEditingController());
+  final _controllers = List.generate(4, (index) => TextEditingController());
 
   @override
   void dispose() {
@@ -20,10 +20,35 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
     super.dispose();
   }
 
+  void _verifikasiKode() {
+    // Ambil isi dari semua TextField
+    String kode = _controllers.map((c) => c.text.trim()).join();
+
+    // Cek apakah semua terisi
+    if (kode.length < 4 || kode.contains(RegExp(r'[^0-9]'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap isi semua kotak dengan angka 0–9!'),
+          backgroundColor: Colors.redAccent,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Jika valid, lanjut ke halaman berikutnya
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ResetPasswordMain(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEFF3E5), // warna latar lembut
+      backgroundColor: const Color(0xFFEFF3E5),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -93,6 +118,9 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                       textAlign: TextAlign.center,
                       textAlignVertical: TextAlignVertical.center,
                       maxLength: 1,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                       decoration: InputDecoration(
                         counterText: "",
                         filled: true,
@@ -101,7 +129,7 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: EdgeInsets.zero
+                        contentPadding: EdgeInsets.zero,
                       ),
                       style: const TextStyle(
                         fontSize: 18,
@@ -110,9 +138,9 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                       ),
                       onChanged: (value) {
                         if (value.isNotEmpty && index < 3) {
-                          FocusScope.of(context).nextFocus(); 
+                          FocusScope.of(context).nextFocus();
                         } else if (value.isEmpty && index > 0) {
-                          FocusScope.of(context).previousFocus(); 
+                          FocusScope.of(context).previousFocus();
                         }
                       },
                     ),
@@ -127,14 +155,7 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ResetPasswordMain(),
-                      ),
-                    );
-                  },
+                  onPressed: _verifikasiKode,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF5C8D4C),
                     shape: RoundedRectangleBorder(
