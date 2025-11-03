@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:regreen/schedule/schedule_detail_page.dart';
 
 class SchedulePage extends StatefulWidget {
   const SchedulePage({super.key});
@@ -26,8 +27,8 @@ class _SchedulePageState extends State<SchedulePage> {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Center(
-                      child: const Text(
+                    const Center(
+                      child: Text(
                         'Jadwal Penjemputan\nSampah Tersedia',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -63,30 +64,22 @@ class _SchedulePageState extends State<SchedulePage> {
                     topRight: Radius.circular(40),
                   ),
                 ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 25,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // === DROPDOWN FILTER ===
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 8,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                       decoration: BoxDecoration(
                         color: const Color(0xFFDDE7CC),
-                        borderRadius: BorderRadius.circular(
-                          20,
-                        ),
+                        borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.05),
                             blurRadius: 4,
-                            offset: Offset(0, 2),
+                            offset: const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -94,13 +87,9 @@ class _SchedulePageState extends State<SchedulePage> {
                         child: DropdownButton<String>(
                           value: selectedWaste,
                           isExpanded: true,
-                          icon: const Icon(
-                            Icons.keyboard_arrow_down_rounded,
-                            size: 20,
-                          ),
+                          icon: const Icon(Icons.keyboard_arrow_down_rounded, size: 20),
                           style: const TextStyle(
-                            fontWeight:
-                                FontWeight.w600,
+                            fontWeight: FontWeight.w600,
                             fontSize: 14,
                             color: Colors.black,
                           ),
@@ -119,6 +108,7 @@ class _SchedulePageState extends State<SchedulePage> {
                         ),
                       ),
                     ),
+
                     const SizedBox(height: 20),
 
                     // === LIST JADWAL ===
@@ -132,6 +122,18 @@ class _SchedulePageState extends State<SchedulePage> {
                               type: 'Organik, Plastik',
                               courier: 'Raditya',
                               image: 'Assets/schedule/kurir1.png',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ScheduleDetailPage(
+                                    courierName: 'Raditya',
+                                    scheduleDate: 'Senin, 19 Mei 2025',
+                                    scheduleTime: '07:00 - 09:00',
+                                    wasteTypes: 'Organik, Plastik',
+                                    courierImage: 'Assets/schedule/kurir1.png',
+                                  ),
+                                ),
+                              ),
                             ),
                             _scheduleCard(
                               date: 'Senin, 26 Mei 2025',
@@ -139,6 +141,18 @@ class _SchedulePageState extends State<SchedulePage> {
                               type: 'Organik, Plastik',
                               courier: 'Edsel',
                               image: 'Assets/schedule/kurir2.png',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ScheduleDetailPage(
+                                    courierName: 'Edsel',
+                                    scheduleDate: 'Senin, 26 Mei 2025',
+                                    scheduleTime: '07:00 - 09:00',
+                                    wasteTypes: 'Organik, Plastik',
+                                    courierImage: 'Assets/schedule/kurir2.png',
+                                  ),
+                                ),
+                              ),
                             ),
                             _scheduleCard(
                               date: 'Senin, 2 Juni 2025',
@@ -146,6 +160,18 @@ class _SchedulePageState extends State<SchedulePage> {
                               type: 'Organik, Plastik',
                               courier: 'Reza',
                               image: 'Assets/schedule/kurir3.png',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ScheduleDetailPage(
+                                    courierName: 'Reza',
+                                    scheduleDate: 'Senin, 2 Juni 2025',
+                                    scheduleTime: '07:00 - 09:00',
+                                    wasteTypes: 'Organik, Plastik',
+                                    courierImage: 'Assets/schedule/kurir3.png',
+                                  ),
+                                ),
+                              ),
                             ),
                             _scheduleCard(
                               date: 'Senin, 9 Juni 2025',
@@ -153,6 +179,18 @@ class _SchedulePageState extends State<SchedulePage> {
                               type: 'Organik, Plastik',
                               courier: 'Abdul',
                               image: 'Assets/schedule/kurir4.png',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ScheduleDetailPage(
+                                    courierName: 'Abdul',
+                                    scheduleDate: 'Senin, 9 Juni 2025',
+                                    scheduleTime: '07:00 - 09:00',
+                                    wasteTypes: 'Organik, Plastik',
+                                    courierImage: 'Assets/schedule/kurir4.png',
+                                  ),
+                                ),
+                              ),
                             ),
                             _scheduleCard(
                               date: 'Senin, 9 Juni 2025',
@@ -160,6 +198,18 @@ class _SchedulePageState extends State<SchedulePage> {
                               type: 'Organik, Plastik',
                               courier: 'Abdul',
                               image: 'Assets/schedule/kurir1.png',
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => ScheduleDetailPage(
+                                    courierName: 'Abdul',
+                                    scheduleDate: 'Senin, 9 Juni 2025',
+                                    scheduleTime: '07:00 - 09:00',
+                                    wasteTypes: 'Organik, Plastik',
+                                    courierImage: 'Assets/schedule/kurir1.png',
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -183,72 +233,49 @@ Widget _scheduleCard({
   required String type,
   required String courier,
   required String image,
+  Function()? onTap,
 }) {
-  return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(12),
-    decoration: BoxDecoration(
-      color: const Color(0xFFDDE7CC),
-      borderRadius: BorderRadius.circular(16),
-    ),
-    child: Row(
-      children: [
-        // TEXT AREA
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                date,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                ),
-              ),
-              const SizedBox(height: 2),
-
-              Text(
-                time,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
-                ),
-              ),
-              const SizedBox(height: 2),
-
-              Text("Sampah : $type", style: const TextStyle(fontSize: 12)),
-              Text("Kurir : $courier", style: const TextStyle(fontSize: 12)),
-              const SizedBox(height: 6),
-
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 3,
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF558B3E),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  "Tersedia",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
+  return InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(16),
+    child: Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDDE7CC),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(date, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16)),
+                const SizedBox(height: 2),
+                Text(time, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+                const SizedBox(height: 2),
+                Text("Sampah : $type", style: const TextStyle(fontSize: 12)),
+                Text("Kurir : $courier", style: const TextStyle(fontSize: 12)),
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                  decoration: BoxDecoration(color: const Color(0xFF558B3E), borderRadius: BorderRadius.circular(20)),
+                  child: const Text(
+                    "Tersedia",
+                    style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-
-        const SizedBox(width: 10),
-
-        ClipRRect(
-          borderRadius: BorderRadius.circular(14),
-          child: Image.asset(image, width: 95, height: 95, fit: BoxFit.cover),
-        ),
-      ],
+          const SizedBox(width: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(14),
+            child: Image.asset(image, width: 95, height: 95, fit: BoxFit.cover),
+          ),
+        ],
+      ),
     ),
   );
 }
