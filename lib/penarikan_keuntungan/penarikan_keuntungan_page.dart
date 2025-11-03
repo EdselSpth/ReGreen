@@ -14,6 +14,8 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
   final TextEditingController _rekeningController = TextEditingController();
   final TextEditingController _nominalController = TextEditingController();
 
+  final List<String> bankList = ['BNI', 'BCA', 'MANDIRI', 'BRI'];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,7 +49,6 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
             children: [
               const SizedBox(height: 20),
 
-              // === SALDO ===
               const Text(
                 'Saldo',
                 style: TextStyle(
@@ -67,13 +68,42 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
               ),
               const SizedBox(height: 30),
 
-              // === INPUT REKENING ===
               _inputField('Nomor Rekening', _rekeningController),
               const SizedBox(height: 16),
 
-              // === INPUT NOMINAL ===
-              _inputField('Nominal', _nominalController),
-              const SizedBox(height: 6),
+              // Dropdown Bank
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.black12),
+                ),
+                child: DropdownButton<String>(
+                  value: selectedBank,
+                  isExpanded: true,
+                  underline: const SizedBox(),
+                  items: bankList.map((bank) {
+                    return DropdownMenuItem<String>(
+                      value: bank,
+                      child: Text(
+                        bank,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedBank = value;
+                    });
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 20),
 
               const Align(
                 alignment: Alignment.centerLeft,
@@ -82,66 +112,29 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
                   style: TextStyle(color: Colors.black54, fontSize: 13),
                 ),
               ),
+
               const SizedBox(height: 20),
 
-              // === PILIH BANK (TEKS SAJA) ===
-              _bankOption('BNI'),
-              _bankOption('BCA'),
-              _bankOption('MANDIRI'),
-              _bankOption('BRI'),
-
+              _inputField('Nominal', _nominalController),
               const SizedBox(height: 30),
 
-              // === TOTAL DAN TOMBOL TARIK ===
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFDDE7CC),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            'Jumlah Penarikan',
-                            style: TextStyle(
-                              color: Colors.black54,
-                              fontSize: 13,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Rp0,00',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+              // btn tarik
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: const Color(0xFF558B3E),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: const Color(0xFF558B3E),
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 28,
-                          vertical: 12,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
-                      ),
-                      onPressed: () {},
-                      child: const Text('Tarik'),
-                    ),
-                  ],
+                  ),
+                  onPressed: () {},
+                  child: const Text(
+                    'Tarik',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
 
@@ -172,31 +165,6 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
         ),
-      ),
-    );
-  }
-
-  Widget _bankOption(String bankName) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: RadioListTile<String>(
-        value: bankName,
-        groupValue: selectedBank,
-        onChanged: (value) {
-          setState(() {
-            selectedBank = value;
-          });
-        },
-        title: Text(
-          bankName,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        activeColor: const Color(0xFF558B3E),
       ),
     );
   }
