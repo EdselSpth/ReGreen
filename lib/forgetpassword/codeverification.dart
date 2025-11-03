@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:regreen/forgetpassword/resetpasswordmain.dart';
 
 class CodeVerificationPage extends StatefulWidget {
@@ -9,8 +10,7 @@ class CodeVerificationPage extends StatefulWidget {
 }
 
 class _CodeVerificationPageState extends State<CodeVerificationPage> {
-  final _controllers =
-      List.generate(4, (index) => TextEditingController()); // 4 digit input
+  final _controllers = List.generate(4, (index) => TextEditingController());
 
   @override
   void dispose() {
@@ -20,10 +20,35 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
     super.dispose();
   }
 
+  void _verifikasiKode() {
+    // Ambil isi dari semua TextField
+    String kode = _controllers.map((c) => c.text.trim()).join();
+
+    // Cek apakah semua terisi
+    if (kode.length < 4 || kode.contains(RegExp(r'[^0-9]'))) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Harap isi semua kotak dengan angka 0–9!'),
+          backgroundColor: Colors.redAccent,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Jika valid, lanjut ke halaman berikutnya
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const ResetPasswordMain(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFEFF3E5), // warna latar lembut
+      backgroundColor: const Color(0xFFEFF3E5),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 32),
@@ -39,15 +64,15 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                     TextSpan(
                       text: 'Re',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: Colors.blueGrey[700],
+                        color: Color(0xFF3B7C87),
                       ),
                     ),
                     const TextSpan(
                       text: 'Green',
                       style: TextStyle(
-                        fontSize: 28,
+                        fontSize: 32,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF5C8D4C),
                       ),
@@ -58,7 +83,7 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
 
               const SizedBox(height: 30),
 
-              // Icon amplop (email)
+              // Icon Mail
               const Icon(
                 Icons.mark_email_unread_rounded,
                 color: Color(0xFF7CB342),
@@ -86,12 +111,16 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                   4,
                   (index) => SizedBox(
                     width: 60,
-                    height: 60,
+                    height: 50,
                     child: TextField(
                       controller: _controllers[index],
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
+                      textAlignVertical: TextAlignVertical.center,
                       maxLength: 1,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                      ],
                       decoration: InputDecoration(
                         counterText: "",
                         filled: true,
@@ -100,17 +129,18 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
+                        contentPadding: EdgeInsets.zero,
                       ),
                       style: const TextStyle(
-                        fontSize: 24,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                         color: Colors.black87,
                       ),
                       onChanged: (value) {
                         if (value.isNotEmpty && index < 3) {
-                          FocusScope.of(context).nextFocus(); // otomatis pindah ke kotak berikut
+                          FocusScope.of(context).nextFocus();
                         } else if (value.isEmpty && index > 0) {
-                          FocusScope.of(context).previousFocus(); // balik ke kotak sebelumnya
+                          FocusScope.of(context).previousFocus();
                         }
                       },
                     ),
@@ -125,14 +155,7 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const ResetPasswordMain(),
-                      ),
-                    );
-                  },
+                  onPressed: _verifikasiKode,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF5C8D4C),
                     shape: RoundedRectangleBorder(
@@ -152,7 +175,6 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
 
               const SizedBox(height: 24),
 
-              // Link Kirim ulang kode
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -166,7 +188,6 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      // TODO: aksi kirim ulang kode
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Kode dikirim ulang')),
                       );

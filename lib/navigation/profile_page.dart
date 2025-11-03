@@ -12,6 +12,93 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: kGreenDark,
+      appBar: AppBar(
+        title: const Text('Profil Pengguna'),
+        backgroundColor: const Color(
+          0xFF7F9F4F,
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: AssetImage('assets/profile1.jpeg'),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Column(
+                children: const [
+                  Text(
+                    'Edsel',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    'Bergabung Sejak 2025',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Informasi Pribadi',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Menggunakan pushReplacement untuk menggantikan halaman tanpa menambah stack
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EditProfilePage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Edit Profil',
+                    style: TextStyle(color: Colors.green, fontSize: 16),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildInfoCard(Icons.email, 'Email', 'edselspth@gmail.com'),
+            const SizedBox(height: 16),
+            _buildInfoCard(Icons.phone, 'No. Telepon', '0851-5503-0650'),
+            const SizedBox(height: 16),
+            _buildInfoCard(
+              Icons.location_on,
+              'Alamat',
+              'Kompleks Taman Bumi Prima Blok O No 8, Kecamatan Cibabat, Kota Cimahi 40513',
+            ),
+            const SizedBox(height: 32),
+            _buildInfoCard(Icons.exit_to_app, 'Lainnya', 'Keluar'),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
 
       body: SafeArea(
         child: Column(
