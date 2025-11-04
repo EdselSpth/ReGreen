@@ -31,29 +31,27 @@ class _MainScreenState extends State<MainScreen> {
 
       body: Center(child: _pages.elementAt(_selectedIndex)),
       bottomNavigationBar: BottomNavigationBar(
-        // --- PERBAIKAN DI SINI ---
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
-            label: 'Home', // Label ditambahkan
+            label: 'Home',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month_outlined),
-            label: 'Riwayat', // Label ditambahkan
+            label: 'Riwayat',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person_outline),
-            label: 'Profil', // Label ditambahkan
+            label: 'Profil',
           ),
         ],
 
-        // -------------------------
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
 
         selectedIconTheme: const IconThemeData(color: kGreenButton),
         unselectedIconTheme: const IconThemeData(color: Colors.grey),
-        selectedItemColor: kGreenButton, // Ini akan mewarnai label yang aktif
+        selectedItemColor: kGreenButton,
 
         type: BottomNavigationBarType.fixed,
 
