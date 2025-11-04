@@ -2,7 +2,6 @@
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
-![Telkom University](https://img.shields.io/badge/Made%20by-Telkom%20University-red?style=for-the-badge)
 
 > Aplikasi ReGreen — sistem digital pengelolaan sampah dan penarikan keuntungan berbasis Flutter.  
 > Dibuat sebagai proyek kolaboratif mahasiswa **Telkom University** untuk mendukung *Smart & Green Environment* 🌱
