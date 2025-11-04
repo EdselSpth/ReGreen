@@ -31,25 +31,6 @@ Aplikasi ini dirancang dengan tampilan **modern, ramah pengguna, dan responsif**
 
 ---
 
-## Struktur Proyek
-
-lib/
-├── navigation/
-│ ├── home_page.dart
-│ ├── schedule_page.dart
-│ ├── profile_page.dart
-│ └── main_screen.dart
-│
-├── penarikan_keuntungan/
-│ └── penarikan_keuntungan_page.dart
-│
-├── assets/
-│ ├── profile.jpg
-│ └── kurir.jpg
-│
-├── main.dart
----
-
 ## Teknologi yang Digunakan
 
 | Teknologi | Keterangan |
