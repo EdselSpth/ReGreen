@@ -44,7 +44,7 @@ Aplikasi ini dirancang dengan tampilan **modern, ramah pengguna, dan responsif**
 
 ---
 
-## 🚀 Cara Menjalankan Proyek
+## Cara Menjalankan Proyek
 
 ###  Clone repository
 ```
