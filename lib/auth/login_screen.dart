@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:regreen/navigation/main_screen.dart';
-import 'register_screen.dart';
+import 'package:regreen/auth/register_screen.dart';
 import 'package:regreen/widget/custom_textfeld.dart';
 import 'package:regreen/forgetpassword/emailverification.dart';
+import 'package:regreen/Service/auth_service.dart';
 
 const Color kBackground = Color(0xFFE8EDDE);
 const Color kGreenButton = Color(0xFF548A3C);
@@ -20,6 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
   bool _rememberMe = false;
 
   @override
@@ -29,26 +33,62 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
-    final String emailOrUsername = _emailController.text;
-    final String password = _passwordController.text;
+  Future<void> _handleLogin() async {
+    final String email = _emailController.text.trim();
+    final String password = _passwordController.text.trim();
 
-    if (emailOrUsername.isEmpty || password.isEmpty) {
+    if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Username dan kata sandi tidak boleh kosong',
-          ), // Teks kustom
+          content: Text('Email dan kata sandi tidak boleh kosong'),
           backgroundColor: Colors.red,
         ),
       );
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const MainScreen()),
-    );
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _authService.login(email: email, password: password);
+
+      if (!mounted) return;
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MainScreen()),
+      );
+    } on FirebaseAuthException catch (e) {
+      String message;
+      if (e.code == 'user-not-found') {
+        message = 'Tidak ada pengguna yang terdaftar dengan email ini.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Password salah.';
+      } else if (e.code == 'invalid-credential') {
+        message = 'Email atau password salah.';
+      } else {
+        message = 'Gagal login. Periksa koneksi atau kredensial Anda.';
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message), backgroundColor: Colors.red),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login gagal: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -89,7 +129,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 32),
                 CustomTextField(
                   controller: _emailController,
-                  hintText: 'Email atau Username',
+                  hintText: 'Email', // Diperbarui menjadi Email
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
@@ -152,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _handleLogin,
+                    onPressed: _isLoading ? null : _handleLogin,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kGreenButton,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -160,14 +200,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text(
-                      'Login',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Text(
+                            'Login',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 50),

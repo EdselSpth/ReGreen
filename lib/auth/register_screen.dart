@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:regreen/Service/auth_service.dart';
 import 'login_screen.dart';
 import 'package:regreen/widget/custom_textfeld.dart';
 
@@ -21,6 +22,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _confirmPasswordController =
       TextEditingController();
 
+  bool _isLoading = false;
+  final AuthService _authService = AuthService();
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -29,7 +33,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     super.dispose();
   }
 
-  void _handleRegister() {
+  Future<void> _handleRegister() async {
     final String username = _usernameController.text;
     final String email = _emailController.text;
     final String password = _passwordController.text;
@@ -50,9 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Password dan konfirmasi password tidak sama',
-          ), // Teks kustom
+          content: Text('Password dan konfirmasi password tidak sama'),
           backgroundColor: Colors.red,
         ),
       );
@@ -69,17 +71,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Pendaftaran berhasil! Silakan login.'),
-        backgroundColor: kGreenButton, // Pakai warna hijau
-      ),
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
+    try {
+      await _authService.register(
+        email: email,
+        password: password,
+        username: username,
+      );
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pendaftaran berhasil! Silakan login.'),
+          backgroundColor: kGreenButton,
+        ),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Pendaftaran gagal: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -143,7 +170,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _handleRegister,
+                    onPressed: _isLoading ? null : _handleRegister,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: kGreenButton,
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -151,14 +178,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderRadius: BorderRadius.circular(30),
                       ),
                     ),
-                    child: const Text(
-                      'Daftar',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Daftar',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 50),
