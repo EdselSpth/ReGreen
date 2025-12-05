@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "886136985812",
+    "project_id": "regreen-62c49",
+    "storage_bucket": "regreen-62c49.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:886136985812:android:1143565f7de55c870a0341",
+        "android_client_info": {
+          "package_name": "com.example.regreen"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyChPuMYD5s2c0IEYdqu6RqrIUozzIRh3nA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
