@@ -211,13 +211,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                           TextButton(
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => const EditProfilePage(),
                                 ),
                               );
+                              await _refreshData();
                             },
                             child: const Text(
                               'Edit Profil',
