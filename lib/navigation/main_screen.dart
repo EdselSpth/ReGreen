@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:regreen/navigation/home_page.dart';
 import 'package:regreen/navigation/schedule_page.dart';
 import 'package:regreen/navigation/profile_page.dart';
-import 'package:regreen/edukasi/edukasipage.dart';
+import 'package:regreen/edukasi/edukasi_screen.dart';
 
 const Color kGreenButton = Color(0xFF6B8E23);
 const Color kPageBackground = Color(0xFFF0F0E8);
@@ -20,7 +20,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     HomePage(),
     SchedulePage(),
-    EdukasiDaurUlangPage(),
+    EdukasiScreen(),
     ProfilePage(),
   ];
 

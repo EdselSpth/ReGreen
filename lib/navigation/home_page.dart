@@ -1,38 +1,88 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:regreen/penarikan_keuntungan/penarikan_keuntungan_page.dart';
+import 'dart:convert';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  String _userName = 'ReGreeners';
+  String? _photoBase64;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          Map<String, dynamic>? data = userDoc.data() as Map<String, dynamic>?;
+          if (data != null && data.containsKey('username')) {
+            if (mounted) {
+              setState(() {
+                _userName = data['username'];
+                _photoBase64 = data['photoBase64'];
+              });
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint("Error mengambil data user: $e");
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    ImageProvider profileImage;
+    if (_photoBase64 != null && _photoBase64!.isNotEmpty) {
+      try {
+        profileImage = MemoryImage(base64Decode(_photoBase64!));
+      } catch (e) {
+        profileImage = const AssetImage('Assets/profile1.jpeg');
+      }
+    } else {
+      profileImage = const AssetImage('Assets/profile1.jpeg');
+    }
     return Scaffold(
       backgroundColor: const Color(0xFF558B3E),
       body: SafeArea(
         child: Column(
           children: [
-            // === HEADER ===
             Padding(
               padding: const EdgeInsets.fromLTRB(30, 45, 30, 45),
               child: Row(
                 children: [
-                  const CircleAvatar(
-                    radius: 30,
-                    backgroundImage: AssetImage('Assets/profile.jpg'),
-                  ),
+                  CircleAvatar(radius: 30, backgroundImage: profileImage),
                   const SizedBox(width: 10),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        'Selamat Datang, Edsel',
-                        style: TextStyle(
+                        'Selamat Datang, $_userName',
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
                           color: Colors.white,
                         ),
                       ),
-                      Text(
+                      const Text(
                         'Mau Setor Apa Hari Ini?',
                         style: TextStyle(color: Colors.white70, fontSize: 15),
                       ),
@@ -41,8 +91,6 @@ class HomePage extends StatelessWidget {
                 ],
               ),
             ),
-
-            // === LAYER PUTIH ===
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -61,7 +109,6 @@ class HomePage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // === CARD SALDO ===
                       Container(
                         padding: const EdgeInsets.all(20),
                         decoration: BoxDecoration(
@@ -91,7 +138,6 @@ class HomePage extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            //bagian navigasi icon forward penarikan keuntungan
                             GestureDetector(
                               onTap: () {
                                 Navigator.push(
@@ -118,11 +164,8 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 18),
-
-                      Divider(color: Colors.black26, thickness: 1),
+                      const Divider(color: Colors.black26, thickness: 1),
                       const SizedBox(height: 18),
-
-                      // === JADWAL HEADER ===
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: const [
@@ -143,8 +186,6 @@ class HomePage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 8),
-
-                      // === CARD JADWAL ===
                       Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFFDDE7CC),
@@ -217,8 +258,6 @@ class HomePage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 18),
-
-                      // === TOMBOL AKSI ===
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -238,8 +277,6 @@ class HomePage extends StatelessWidget {
                         ],
                       ),
                       const SizedBox(height: 18),
-
-                      // === BANNER ===
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
@@ -297,26 +334,25 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
-}
 
-// Tombol aksi reusable
-Widget _actionButton({required IconData icon, required String label}) {
-  return Container(
-    decoration: BoxDecoration(
-      color: const Color(0xFFDDE7CC),
-      borderRadius: BorderRadius.circular(12),
-    ),
-    padding: const EdgeInsets.symmetric(vertical: 14),
-    child: Column(
-      children: [
-        Icon(icon, color: const Color(0xFF558B3E), size: 26),
-        const SizedBox(height: 6),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-        ),
-      ],
-    ),
-  );
+  Widget _actionButton({required IconData icon, required String label}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFDDE7CC),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Column(
+        children: [
+          Icon(icon, color: const Color(0xFF558B3E), size: 26),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
 }
