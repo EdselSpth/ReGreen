@@ -66,7 +66,6 @@ class ProfilePage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Foto profil
                       Center(
                         child: Container(
                           width: 120,
@@ -75,7 +74,7 @@ class ProfilePage extends StatelessWidget {
                             shape: BoxShape.circle,
                             image: const DecorationImage(
                               fit: BoxFit.cover,
-                              image: AssetImage('assets/profile1.jpeg'),
+                              image: AssetImage('Assets/profile1.jpeg'),
                             ),
                             border: Border.all(color: kGreenDark, width: 2),
                           ),
