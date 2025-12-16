@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class VideoPage extends StatelessWidget {
   const VideoPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Data Dummy
+    // Data Dummy YouTube
     final List<Map<String, String>> videos = [
       {
-        'title': 'Cara Memilah Sampah Organik & Anorganik',
-        'duration': '05:20',
-        'image': 'Assets/onboarding/ob1-image.png', // Pakai aset yang ada dulu
+        'title': 'Mengapa Daur Ulang Penting',
+        'duration': '05:54',
+        'youtubeId': 'M2BtJdgzo-E',
       },
       {
-        'title': 'DIY: Membuat Pot Bunga dari Botol Plastik',
-        'duration': '03:45',
-        'image': 'Assets/onboarding/ob2-image.png',
+        'title': 'Memilah Sampah di Rumah',
+        'duration': '07.17',
+        'youtubeId': 'zfJLbjN-O98',
       },
       {
-        'title': 'Mengenal Jenis Plastik yang Bisa Daur Ulang',
-        'duration': '08:10',
-        'image': 'Assets/onboarding/ob3-image.png',
+        'title': 'Bahaya Senyap Mikroplastik',
+        'duration': '05:10',
+        'youtubeId': 'wDqu0SRjjWE',
       },
       {
-        'title': 'Tutorial Membuat Kompos Sederhana di Rumah',
-        'duration': '06:30',
-        'image': 'Assets/onboarding/ob1-image.png',
+        'title': 'Kompos Sampah Makanan di Rumah',
+        'duration': '05:09',
+        'youtubeId': 'RhEHoyYPtTM',
       },
     ];
 
@@ -68,20 +69,49 @@ class VideoPage extends StatelessWidget {
               child: InkWell(
                 borderRadius: BorderRadius.circular(16),
                 onTap: () {
-                  // Aksi ketika video diklik
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Memutar: ${video['title']}")),
+                  // Memutar video YouTube di dialog
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      YoutubePlayerController _controller =
+                          YoutubePlayerController(
+                        initialVideoId: video['youtubeId']!,
+                        flags: const YoutubePlayerFlags(
+                          autoPlay: true,
+                          mute: false,
+                        ),
+                      );
+                      return AlertDialog(
+                        content: SizedBox(
+                          width: double.infinity,
+                          height: 200,
+                          child: YoutubePlayer(
+                            controller: _controller,
+                            showVideoProgressIndicator: true,
+                          ),
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              _controller.pause();
+                              Navigator.pop(context);
+                            },
+                            child: const Text('Tutup'),
+                          ),
+                        ],
+                      );
+                    },
                   );
                 },
                 child: Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
                     children: [
-                      // Thumbnail
+                      // Thumbnail dari YouTube
                       ClipRRect(
                         borderRadius: BorderRadius.circular(12),
-                        child: Image.asset(
-                          video['image']!,
+                        child: Image.network(
+                          'https://img.youtube.com/vi/${video['youtubeId']}/0.jpg',
                           width: 80,
                           height: 80,
                           fit: BoxFit.cover,
