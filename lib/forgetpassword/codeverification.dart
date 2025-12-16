@@ -10,7 +10,8 @@ class CodeVerificationPage extends StatefulWidget {
 }
 
 class _CodeVerificationPageState extends State<CodeVerificationPage> {
-  final _controllers = List.generate(4, (index) => TextEditingController());
+  // Pastikan list controller dibuat sebanyak 6
+  final _controllers = List.generate(6, (index) => TextEditingController());
 
   @override
   void dispose() {
@@ -21,14 +22,13 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
   }
 
   void _verifikasiKode() {
-    // Ambil isi dari semua TextField
     String kode = _controllers.map((c) => c.text.trim()).join();
 
-    // Cek apakah semua terisi
-    if (kode.length < 4 || kode.contains(RegExp(r'[^0-9]'))) {
+    // Validasi untuk 6 digit
+    if (kode.length < 6 || kode.contains(RegExp(r'[^0-9]'))) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Harap isi semua kotak dengan angka 0–9!'),
+          content: Text('Harap isi semua 6 kotak dengan angka!'),
           backgroundColor: Colors.redAccent,
           duration: Duration(seconds: 2),
         ),
@@ -36,12 +36,9 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
       return;
     }
 
-    // Jika valid, lanjut ke halaman berikutnya
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const ResetPasswordMain(),
-      ),
+      MaterialPageRoute(builder: (context) => const ResetPasswordMain()),
     );
   }
 
@@ -51,13 +48,13 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
       backgroundColor: const Color(0xFFEFF3E5),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32),
+          padding: const EdgeInsets.symmetric(
+            horizontal: 20,
+          ), // Padding dikurangi sedikit agar muat
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 40),
-
-              // Logo ReGreen
               Text.rich(
                 TextSpan(
                   children: [
@@ -83,7 +80,6 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
 
               const SizedBox(height: 30),
 
-              // Icon Mail
               const Icon(
                 Icons.mark_email_unread_rounded,
                 color: Color(0xFF7CB342),
@@ -92,8 +88,9 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
 
               const SizedBox(height: 20),
 
+              // PERBAIKAN: Ubah teks jadi 6 digit
               const Text(
-                "Masukan 4 digit verifikasi dari\nemail anda",
+                "Masukan 6 digit verifikasi dari\nemail anda",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
@@ -104,23 +101,21 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
 
               const SizedBox(height: 30),
 
-              // Kotak 4 digit kode verifikasi
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: List.generate(
-                  4,
+                  6,
                   (index) => SizedBox(
-                    width: 60,
+                    width: 45,
                     height: 50,
                     child: TextField(
                       controller: _controllers[index],
                       keyboardType: TextInputType.number,
                       textAlign: TextAlign.center,
-                      textAlignVertical: TextAlignVertical.center,
+                      textAlignVertical: TextAlignVertical
+                          .center, // Pastikan kursor di tengah vertikal
                       maxLength: 1,
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                      ],
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
                         counterText: "",
                         filled: true,
@@ -129,7 +124,8 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
-                        contentPadding: EdgeInsets.zero,
+                        contentPadding:
+                            EdgeInsets.zero, // Penting agar teks pas di tengah
                       ),
                       style: const TextStyle(
                         fontSize: 18,
@@ -137,7 +133,8 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                         color: Colors.black87,
                       ),
                       onChanged: (value) {
-                        if (value.isNotEmpty && index < 3) {
+                        // Logika pindah fokus
+                        if (value.isNotEmpty && index < 5) {
                           FocusScope.of(context).nextFocus();
                         } else if (value.isEmpty && index > 0) {
                           FocusScope.of(context).previousFocus();
@@ -150,7 +147,6 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
 
               const SizedBox(height: 30),
 
-              // Tombol Kirim
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -173,8 +169,8 @@ class _CodeVerificationPageState extends State<CodeVerificationPage> {
                 ),
               ),
 
+              // ... sisa kode bawah sama (tombol kirim ulang dll) ...
               const SizedBox(height: 24),
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

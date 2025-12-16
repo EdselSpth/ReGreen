@@ -61,6 +61,24 @@ class _LoginScreenState extends State<LoginScreen> {
         MaterialPageRoute(builder: (context) => const MainScreen()),
       );
     } on FirebaseAuthException catch (e) {
+      if (e.code == 'email-not-verified') {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("Email belum terverifikasi"),
+            content: const Text(
+              "Kamu belum verifikasi email. \n\n Silahkan cek inbox email kamu (atau folder spam) untuk verifikasi",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("OK"),
+              ),
+            ],
+          ),
+        );
+      }
+
       String message;
       if (e.code == 'user-not-found') {
         message = 'Tidak ada pengguna yang terdaftar dengan email ini.';
