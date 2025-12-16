@@ -20,6 +20,8 @@ class AuthService {
       User? user = result.user;
 
       if (user != null) {
+        await user.sendEmailVerification();
+
         UserModel newUser = UserModel(
           uid: user.uid,
           email: email,
@@ -47,7 +49,20 @@ class AuthService {
         email: email,
         password: password,
       );
-      return result.user;
+      User? user = result.user;
+
+      if (user != null) {
+        if (!user.emailVerified) {
+          await _auth.signOut();
+
+          throw FirebaseAuthException(
+            code: 'email-not-verified',
+            message: 'Email belum diverifikasi. cek inbox kamu!',
+          );
+        }
+      }
+
+      return user;
     } on FirebaseAuthException {
       rethrow;
     } catch (e) {
@@ -57,5 +72,19 @@ class AuthService {
 
   Future<void> logout() async {
     await _auth.signOut();
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'user-not-found') {
+        throw Exception('Email tidak terdaftar.');
+      } else {
+        throw Exception(e.message);
+      }
+    } catch (e) {
+      throw Exception('Gagal mengirim email reset: $e');
+    }
   }
 }

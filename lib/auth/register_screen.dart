@@ -42,9 +42,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Seluruh data harus diisi untuk melakukan pendaftaran',
-          ), // Teks kustom
+          content: Text('Seluruh data harus diisi untuk melakukan pendaftaran'),
           backgroundColor: Colors.red,
         ),
       );
@@ -83,15 +81,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Pendaftaran berhasil! Silakan login.'),
-          backgroundColor: kGreenButton,
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text("Registrasi Berhasil"),
+          content: Text(
+            "Link verifikasi telah dikirim ke email **$email**.\n\nSilakan cek inbox (atau folder spam), klik link tersebut, lalu login kembali di aplikasi.",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+              child: const Text("OK, Saya Cek Email"),
+            ),
+          ],
         ),
-      );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(

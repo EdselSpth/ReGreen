@@ -30,9 +30,7 @@ class _EmailVerifikasiPageState extends State<EmailVerifikasiPage> {
     // Jika terisi, lanjut ke halaman berikutnya
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const CodeVerificationPage(),
-      ),
+      MaterialPageRoute(builder: (context) => const CodeVerificationPage()),
     );
   }
 
@@ -106,7 +104,6 @@ class _EmailVerifikasiPageState extends State<EmailVerifikasiPage> {
 
                 const SizedBox(height: 24),
 
-                // Input Email
                 TextField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
