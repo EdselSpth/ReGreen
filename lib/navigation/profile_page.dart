@@ -59,12 +59,43 @@ class _ProfilePageState extends State<ProfilePage> {
             }
           }
 
+          String fullAddress = '-';
+
+          if (data != null &&
+              data['address'] != null &&
+              data['address'] is Map) {
+            Map<String, dynamic> addr = data['address'];
+
+            List<String> addressParts = [];
+
+            if (addr['jalan'] != null && addr['jalan'].toString().isNotEmpty)
+              addressParts.add(addr['jalan']);
+            if (addr['kelurahan'] != null &&
+                addr['kelurahan'].toString().isNotEmpty)
+              addressParts.add(addr['kelurahan']);
+            if (addr['kecamatan'] != null &&
+                addr['kecamatan'].toString().isNotEmpty)
+              addressParts.add(addr['kecamatan']);
+            if (addr['kota'] != null && addr['kota'].toString().isNotEmpty)
+              addressParts.add(addr['kota']);
+            if (addr['provinsi'] != null &&
+                addr['provinsi'].toString().isNotEmpty)
+              addressParts.add(addr['provinsi']);
+            if (addressParts.isNotEmpty) {
+              fullAddress = addressParts.join(', ');
+            }
+          } else {
+            fullAddress = data?['address'] ?? '-';
+          }
+
           if (mounted) {
             setState(() {
               _username = data?['username'] ?? 'No Name';
               _email = data?['email'] ?? 'No Email';
               _phoneNumber = data?['phoneNumber'] ?? '-';
-              _address = data?['address'] ?? '-';
+
+              _address = fullAddress;
+
               _joinYear = yearResult;
               _photoBase64 = data?['photoBase64'];
             });

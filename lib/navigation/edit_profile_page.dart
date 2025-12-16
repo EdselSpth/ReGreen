@@ -17,11 +17,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
   static const Color kCream = Color(0xFFE8EDDE);
   static const Color kGreenLight = Color(0xFFDDE7CC);
 
-  final nameC = TextEditingController();
-  final emailC = TextEditingController();
-  final phoneC = TextEditingController();
-  final addrC = TextEditingController();
-  final passC = TextEditingController();
+  final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final phoneController = TextEditingController();
+  final passwordController = TextEditingController();
+  final jalanController = TextEditingController();
+  final kecamatanController = TextEditingController();
+  final kelurahanaController = TextEditingController();
+  final kotaController = TextEditingController();
+  final provinsiController = TextEditingController();
 
   bool _isLoading = false;
 
@@ -37,11 +41,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   @override
   void dispose() {
-    nameC.dispose();
-    emailC.dispose();
-    phoneC.dispose();
-    addrC.dispose();
-    passC.dispose();
+    nameController.dispose();
+    emailController.dispose();
+    phoneController.dispose();
+    passwordController.dispose();
+    jalanController.dispose();
+    kecamatanController.dispose();
+    kelurahanaController.dispose();
+    kotaController.dispose();
+    provinsiController.dispose();
     super.dispose();
   }
 
@@ -57,11 +65,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
         if (userDoc.exists && mounted) {
           Map<String, dynamic> data = userDoc.data() as Map<String, dynamic>;
           setState(() {
-            nameC.text = data['username'] ?? '';
-            emailC.text = data['email'] ?? '';
-            phoneC.text = data['phoneNumber'] ?? '';
-            addrC.text = data['address'] ?? '';
+            nameController.text = data['username'] ?? '';
+            emailController.text = data['email'] ?? '';
+            phoneController.text = data['phoneNumber'] ?? '';
             _currentPhotoBase64 = data['photoBase64'];
+
+            if (data['address'] != null && data['address'] is Map) {
+              Map<String, dynamic> addr = data['address'];
+              jalanController.text = addr['jalan'] ?? '';
+              kecamatanController.text = addr['kecamatan'] ?? '';
+              kelurahanaController.text = addr['kelurahan'] ?? '';
+              kotaController.text = addr['kota'] ?? '';
+              provinsiController.text = addr['provinsi'] ?? '';
+            } else {
+              jalanController.text = '';
+              kecamatanController.text = '';
+              kelurahanaController.text = '';
+              kotaController.text = '';
+              provinsiController.text = '';
+            }
           });
         }
       } catch (e) {
@@ -92,7 +114,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   }
 
   Future<void> _saveProfile() async {
-    if (nameC.text.isEmpty) {
+    if (nameController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Nama tidak boleh kosong')));
@@ -112,9 +134,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
         }
 
         Map<String, dynamic> dataToUpdate = {
-          'username': nameC.text,
-          'phoneNumber': phoneC.text,
-          'address': addrC.text,
+          'username': nameController.text,
+          'phoneNumber': phoneController.text,
+
+          'address': {
+            'jalan': jalanController.text,
+            'kecamatan': kecamatanController.text,
+            'kelurahan': kelurahanaController.text,
+            'kota': kotaController.text,
+            'provinsi': provinsiController.text,
+          },
         };
 
         if (base64Image != null) {
@@ -126,14 +155,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
             .doc(user.uid)
             .update(dataToUpdate);
 
-        if (passC.text.isNotEmpty) {
-          if (passC.text.length < 6) {
+        if (passwordController.text.isNotEmpty) {
+          if (passwordController.text.length < 6) {
             throw FirebaseAuthException(
               code: 'weak-password',
               message: 'Password minimal 6 karakter',
             );
           }
-          await user.updatePassword(passC.text);
+          await user.updatePassword(passwordController.text);
         }
 
         if (mounted) {
@@ -199,7 +228,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
                       'Edit Profil Pengguna',
@@ -215,6 +243,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ],
               ),
             ),
+            const SizedBox(height: 8),
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -248,30 +277,37 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               children: [
                                 const SizedBox(height: 16),
                                 _fieldLabel('Nama'),
-                                _filledField(controller: nameC),
+                                _filledField(controller: nameController),
                                 const SizedBox(height: 12),
                                 _fieldLabel('Email'),
                                 _filledField(
-                                  controller: emailC,
+                                  controller: emailController,
                                   keyboardType: TextInputType.emailAddress,
                                   isReadOnly: true,
                                 ),
                                 const SizedBox(height: 12),
                                 _fieldLabel('No Telepon'),
                                 _filledField(
-                                  controller: phoneC,
+                                  controller: phoneController,
                                   keyboardType: TextInputType.phone,
                                 ),
+                                const SizedBox(height: 16),
+                                _fieldLabel('Alamat Lengkap'),
+                                const SizedBox(height: 6),
+                                _fieldLabel('Nama Jalan'),
+                                _filledField(controller: jalanController),
                                 const SizedBox(height: 12),
-                                _fieldLabel('Alamat'),
-                                _filledField(controller: addrC, maxLines: 3),
+                                _fieldLabel('Kelurahan'),
+                                _filledField(controller: kelurahanaController),
                                 const SizedBox(height: 12),
-                                _fieldLabel('Password Baru (Opsional)'),
-                                _filledField(
-                                  controller: passC,
-                                  obscure: true,
-                                  hint: 'Isi jika ingin ganti password',
-                                ),
+                                _fieldLabel('Kecamatan'),
+                                _filledField(controller: kecamatanController),
+                                const SizedBox(height: 12),
+                                _fieldLabel('Kota'),
+                                _filledField(controller: kotaController),
+                                const SizedBox(height: 12),
+                                _fieldLabel('Provinsi'),
+                                _filledField(controller: provinsiController),
                                 const SizedBox(height: 24),
                                 SizedBox(
                                   width: double.infinity,
@@ -308,7 +344,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             ),
                           ),
                           Positioned(
-                            top: -40,
+                            top: -10,
                             left: 0,
                             right: 0,
                             child: Center(
