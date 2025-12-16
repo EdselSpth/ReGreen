@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:regreen/Service/auth_service.dart';
 import 'package:regreen/auth/login_screen.dart';
-import 'package:regreen/forgetpassword/codeverification.dart';
 
 class EmailVerifikasiPage extends StatefulWidget {
   const EmailVerifikasiPage({super.key});
@@ -11,12 +11,14 @@ class EmailVerifikasiPage extends StatefulWidget {
 
 class _EmailVerifikasiPageState extends State<EmailVerifikasiPage> {
   final TextEditingController _emailController = TextEditingController();
+  bool _isLoading = false;
 
-  void _kirimEmail() {
+  final AuthService _authService = AuthService();
+
+  Future<void> _kirimEmail() async {
     String email = _emailController.text.trim();
 
     if (email.isEmpty) {
-      // Jika kosong, tampilkan pesan error
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Email tidak boleh kosong!"),
@@ -27,11 +29,50 @@ class _EmailVerifikasiPageState extends State<EmailVerifikasiPage> {
       return;
     }
 
-    // Jika terisi, lanjut ke halaman berikutnya
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const CodeVerificationPage()),
-    );
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await _authService.resetPassword(email);
+
+      if (!mounted) return;
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Email Terkirim"),
+          content: Text(
+            "Link reset password telah dikirim ke **$email**, \n\nSilahkan cek inbox/spam email kamu untuk melakukan reset password",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+              child: const Text("OK, Kembali ke login?"),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.toString().replaceAll("Exception :", "")),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   @override
@@ -39,13 +80,14 @@ class _EmailVerifikasiPageState extends State<EmailVerifikasiPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFEFF3E5),
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 20),
+          child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(height: 48),
                 Text.rich(
                   TextSpan(
                     children: [
@@ -69,26 +111,16 @@ class _EmailVerifikasiPageState extends State<EmailVerifikasiPage> {
                   ),
                 ),
                 const SizedBox(height: 30),
-
-                Column(
-                  children: const [
-                    Text(
-                      "|0||0|",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF5C8D4C),
-                        letterSpacing: 3,
-                      ),
-                    ),
-                    Icon(
-                      Icons.vpn_key_rounded,
-                      size: 60,
-                      color: Color(0xFF8CC63F),
-                    ),
-                  ],
+                const Icon(
+                  Icons.lock_reset,
+                  size: 50,
+                  color: Color(0xFF5C8D4C),
                 ),
-
+                const SizedBox(height: 30),
+                const Text(
+                  "Lupa Password",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 24),
 
                 const Text(
@@ -135,21 +167,23 @@ class _EmailVerifikasiPageState extends State<EmailVerifikasiPage> {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: _kirimEmail,
+                    onPressed: _isLoading ? null : _kirimEmail,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF5C8D4C),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(50),
                       ),
                     ),
-                    child: const Text(
-                      "Kirim",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            "Kirim Link Reset",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
                 ),
 
@@ -160,7 +194,7 @@ class _EmailVerifikasiPageState extends State<EmailVerifikasiPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      "Sudah punya akun? ",
+                      "Ingat Passwordmu? ",
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
