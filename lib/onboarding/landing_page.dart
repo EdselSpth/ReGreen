@@ -25,7 +25,7 @@ class LandingPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Spacer(flex: 2),
+                  const Spacer(flex: 3),
                   Column(
                     children: [
                       Image.asset('Assets/Logo-LandingPage.png', height: 150),
@@ -36,12 +36,14 @@ class LandingPage extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 60.0),
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => OnboardingScreen(),
-                          ),
-                        );
+                        if (context.mounted) {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => OnboardingScreen(),
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF7A9B7A),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:regreen/onboarding/onboarding_page.dart';
 import 'package:regreen/auth/login_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const Color kOnboardingBackground = Color(0xFFE8EDDE);
 const Color kGreenButton = Color(0xFF7A9B7A);
@@ -34,11 +35,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     super.dispose();
   }
 
-  void goToNextScreen() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginScreen()),
-    );
+  void goToNextScreen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('seenOnboarding', true);
+
+    if (mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+    }
   }
 
   @override
