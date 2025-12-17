@@ -27,6 +27,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final kotaController = TextEditingController();
   final provinsiController = TextEditingController();
 
+  final nomerRekeningController = TextEditingController();
+  final namaBankController = TextEditingController();
+
   bool _isLoading = false;
 
   File? _imageFile;
@@ -50,6 +53,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
     kelurahanaController.dispose();
     kotaController.dispose();
     provinsiController.dispose();
+    nomerRekeningController.dispose();
+    namaBankController.dispose();
     super.dispose();
   }
 
@@ -83,6 +88,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
               kelurahanaController.text = '';
               kotaController.text = '';
               provinsiController.text = '';
+            }
+
+            if (data['bankAccount'] != null && data['bankAccount'] is Map) {
+              Map<String, dynamic> bankAcc = data['bankAccount'];
+              nomerRekeningController.text = bankAcc['accountNumber'] ?? '';
+              namaBankController.text = bankAcc['bankName'] ?? '';
+            } else {
+              nomerRekeningController.text = '';
+              namaBankController.text = '';
             }
           });
         }
@@ -143,6 +157,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
             'kelurahan': kelurahanaController.text,
             'kota': kotaController.text,
             'provinsi': provinsiController.text,
+          },
+
+          'bankAccount': {
+            'accountNumber': nomerRekeningController.text,
+            'bankName': namaBankController.text,
           },
         };
 
@@ -308,6 +327,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 const SizedBox(height: 12),
                                 _fieldLabel('Provinsi'),
                                 _filledField(controller: provinsiController),
+                                const SizedBox(height: 12),
+                                _fieldLabel('Nomer Rekening'),
+                                _filledField(
+                                  controller: nomerRekeningController,
+                                  keyboardType: TextInputType.number,
+                                ),
+                                const SizedBox(height: 12),
+                                _fieldLabel('Nama Bank'),
+                                _filledField(controller: namaBankController),
                                 const SizedBox(height: 24),
                                 SizedBox(
                                   width: double.infinity,

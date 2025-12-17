@@ -5,6 +5,7 @@ import 'package:regreen/auth/register_screen.dart';
 import 'package:regreen/widget/custom_textfeld.dart';
 import 'package:regreen/forgetpassword/emailverification.dart';
 import 'package:regreen/Service/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const Color kBackground = Color(0xFFE8EDDE);
 const Color kGreenButton = Color(0xFF548A3C);
