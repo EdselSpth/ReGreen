@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:regreen/penarikan_keuntungan/status_penarikan_page.dart';
 import '../Service/api_service_keuntungan.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../service/user_service.dart';
+
 
 class PenarikanKeuntunganPage extends StatefulWidget {
   const PenarikanKeuntunganPage({super.key});
@@ -199,37 +201,48 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
                         ),
                       ),
                       onPressed: getNominalValue() >= 20000
-                          ? () async {
-                              final user = FirebaseAuth.instance.currentUser;
+    ? () async {
+        final user = FirebaseAuth.instance.currentUser;
+        if (user == null) return;
 
-                              if (user == null) return;
+        final profile =
+            await UserService.getUserProfile(user.uid);
 
-                              final success =
-                                  await ApiServiceKeuntungan.tarikKeuntungan(
-                                    firebaseUid: user.uid,
-                                    namaPengguna:
-                                        user.displayName ?? "Pengguna",
-                                    nominal: getNominalValue(),
-                                  );
+        if (profile == null ||
+            profile['bankAccount'] == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Data rekening belum lengkap"),
+            ),
+          );
+          return;
+        }
 
-                              if (success) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Penarikan berhasil diajukan, menunggu persetujuan admin",
-                                    ),
-                                  ),
-                                );
+        await ApiServiceKeuntungan.tarikKeuntungan(
+          firebaseUid: user.uid,
+          namaPengguna: profile['username'],
+          nominal: getNominalValue(),
+          rekening: profile['bankAccount']['accountNumber'],
+          metode: profile['bankAccount']['bankName'],
+        );
 
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const StatusPenarikanPage(),
-                                  ),
-                                );
-                              }
-                            }
-                          : null,
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Penarikan berhasil diajukan",
+            ),
+          ),
+        );
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const StatusPenarikanPage(),
+          ),
+        );
+      }
+    : null,
+
                       child: const Text(
                         'Tarik',
                         style: TextStyle(
