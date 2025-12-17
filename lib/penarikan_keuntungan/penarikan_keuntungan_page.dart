@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:regreen/penarikan_keuntungan/status_penarikan_page.dart';
+import '../Service/api_service_keuntungan.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class PenarikanKeuntunganPage extends StatefulWidget {
   const PenarikanKeuntunganPage({super.key});
@@ -8,10 +11,8 @@ class PenarikanKeuntunganPage extends StatefulWidget {
       _PenarikanKeuntunganPageState();
 }
 
-class _PenarikanKeuntunganPageState
-    extends State<PenarikanKeuntunganPage> {
-  final TextEditingController _nominalController =
-      TextEditingController();
+class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
+  final TextEditingController _nominalController = TextEditingController();
 
   int selectedNominal = 0;
 
@@ -94,9 +95,7 @@ class _PenarikanKeuntunganPageState
               padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
                 color: Color(0xFFE8EDDE),
-                borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(40),
-                ),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
               ),
               child: Column(
                 children: [
@@ -113,10 +112,7 @@ class _PenarikanKeuntunganPageState
                   const SizedBox(height: 6),
                   const Text(
                     'Rp 199.900.000',
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
 
                   const SizedBox(height: 30),
@@ -151,10 +147,7 @@ class _PenarikanKeuntunganPageState
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Minimal Penarikan Rp20.000',
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: Colors.black54,
-                      ),
+                      style: TextStyle(fontSize: 13, color: Colors.black54),
                     ),
                   ),
 
@@ -170,11 +163,8 @@ class _PenarikanKeuntunganPageState
                       return GestureDetector(
                         onTap: () => setNominal(nominal),
                         child: Container(
-                          width:
-                              (MediaQuery.of(context).size.width - 72) /
-                                  2,
-                          padding:
-                              const EdgeInsets.symmetric(vertical: 14),
+                          width: (MediaQuery.of(context).size.width - 72) / 2,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           alignment: Alignment.center,
                           decoration: BoxDecoration(
                             color: isSelected
@@ -186,9 +176,7 @@ class _PenarikanKeuntunganPageState
                             formatRupiah(nominal),
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.black,
+                              color: isSelected ? Colors.white : Colors.black,
                             ),
                           ),
                         ),
@@ -205,15 +193,41 @@ class _PenarikanKeuntunganPageState
                       style: TextButton.styleFrom(
                         backgroundColor: const Color(0xFF558B3E),
                         foregroundColor: Colors.white,
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 14),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       onPressed: getNominalValue() >= 20000
-                          ? () {
-                              // logic tarik
+                          ? () async {
+                              final user = FirebaseAuth.instance.currentUser;
+
+                              if (user == null) return;
+
+                              final success =
+                                  await ApiServiceKeuntungan.tarikKeuntungan(
+                                    firebaseUid: user.uid,
+                                    namaPengguna:
+                                        user.displayName ?? "Pengguna",
+                                    nominal: getNominalValue(),
+                                  );
+
+                              if (success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Penarikan berhasil diajukan, menunggu persetujuan admin",
+                                    ),
+                                  ),
+                                );
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const StatusPenarikanPage(),
+                                  ),
+                                );
+                              }
                             }
                           : null,
                       child: const Text(
