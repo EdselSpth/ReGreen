@@ -44,7 +44,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month_outlined),
-            label: 'Riwayat',
+            label: 'Jadwal',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.book_outlined),
