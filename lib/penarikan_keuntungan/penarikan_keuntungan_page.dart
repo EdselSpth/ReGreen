@@ -8,11 +8,55 @@ class PenarikanKeuntunganPage extends StatefulWidget {
       _PenarikanKeuntunganPageState();
 }
 
-class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
-  String? selectedBank = 'BNI';
+class _PenarikanKeuntunganPageState
+    extends State<PenarikanKeuntunganPage> {
+  final TextEditingController _nominalController =
+      TextEditingController();
 
-  final TextEditingController _rekeningController = TextEditingController();
-  final TextEditingController _nominalController = TextEditingController();
+  int selectedNominal = 0;
+
+  final List<int> nominalOptions = [
+    20000,
+    40000,
+    50000,
+    75000,
+    100000,
+    150000,
+    200000,
+    250000,
+    500000,
+    1000000,
+  ];
+
+  String formatRupiah(int value) {
+    final String number = value.toString();
+    final StringBuffer buffer = StringBuffer();
+    int counter = 0;
+
+    for (int i = number.length - 1; i >= 0; i--) {
+      buffer.write(number[i]);
+      counter++;
+      if (counter % 3 == 0 && i != 0) {
+        buffer.write('.');
+      }
+    }
+
+    return 'Rp ${buffer.toString().split('').reversed.join()}';
+  }
+
+  int getNominalValue() {
+    return int.tryParse(
+          _nominalController.text.replaceAll(RegExp(r'[^0-9]'), ''),
+        ) ??
+        0;
+  }
+
+  void setNominal(int value) {
+    setState(() {
+      selectedNominal = value;
+      _nominalController.text = formatRupiah(value);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,174 +64,172 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
       backgroundColor: const Color(0xFF558B3E),
       body: Column(
         children: [
-          // header
+          // Header
           Container(
-            padding: const EdgeInsets.only(
-              top: 50,
-              left: 10,
-              right: 20,
-              bottom: 10,
-            ),
-            width: double.infinity,
-            color: const Color(0xFF558B3E),
+            padding: const EdgeInsets.only(top: 50, bottom: 10),
             child: Row(
               children: [
                 IconButton(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
                 ),
-                const SizedBox(width: 100),
-                const Text(
-                  "Penarikan Keuntungan",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                const Expanded(
+                  child: Text(
+                    "Penarikan Keuntungan",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(width: 48),
               ],
             ),
           ),
 
-          //Scrollable
           Expanded(
             child: Container(
-              width: double.infinity,
+              padding: const EdgeInsets.all(24),
               decoration: const BoxDecoration(
                 color: Color(0xFFE8EDDE),
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(40),
                 ),
               ),
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const SizedBox(height: 20),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
 
-                    const Text(
-                      'Saldo',
+                  const Text(
+                    'Saldo',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.black54,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    'Rp 199.900.000',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
+
+                  // Input Nominal
+                  TextField(
+                    controller: _nominalController,
+                    keyboardType: TextInputType.number,
+                    onChanged: (_) {
+                      setState(() {
+                        selectedNominal = getNominalValue();
+                      });
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Nominal',
+                      filled: true,
+                      fillColor: Colors.white,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Minimal Penarikan Rp20.000',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 13,
                         color: Colors.black54,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Rp. 200.000.000,00',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
+                  ),
 
-                    const SizedBox(height: 30),
+                  const SizedBox(height: 20),
 
-                    _inputField('Nomor Rekening', _rekeningController),
-                    const SizedBox(height: 16),
+                  // Nominal Buttons
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: nominalOptions.map((nominal) {
+                      final isSelected = selectedNominal == nominal;
 
-                    _bankOption('BNI'),
-                    _bankOption('BCA'),
-                    _bankOption('MANDIRI'),
-                    _bankOption('BRI'),
-
-                    const SizedBox(height: 20),
-
-                    _inputField('Nominal', _nominalController),
-                    const SizedBox(height: 6),
-
-                    const Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        'Minimal Penarikan Rp. 50.000',
-                        style: TextStyle(color: Colors.black54, fontSize: 13),
-                      ),
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: const Color(0xFF558B3E),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+                      return GestureDetector(
+                        onTap: () => setNominal(nominal),
+                        child: Container(
+                          width:
+                              (MediaQuery.of(context).size.width - 72) /
+                                  2,
+                          padding:
+                              const EdgeInsets.symmetric(vertical: 14),
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFF558B3E)
+                                : Colors.white,
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Text(
+                            formatRupiah(nominal),
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.black,
+                            ),
                           ),
                         ),
-                        onPressed: () {},
-                        child: const Text(
-                          'Tarik',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      );
+                    }).toList(),
+                  ),
+
+                  const Spacer(),
+
+                  // Button Tarik
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: const Color(0xFF558B3E),
+                        foregroundColor: Colors.white,
+                        padding:
+                            const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: getNominalValue() >= 20000
+                          ? () {
+                              // logic tarik
+                            }
+                          : null,
+                      child: const Text(
+                        'Tarik',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-
-                    const SizedBox(height: 40),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _inputField(String label, TextEditingController controller) {
-    return TextField(
-      controller: controller,
-      keyboardType: label == 'Nominal'
-          ? TextInputType.number
-          : TextInputType.text,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.black54),
-        filled: true,
-        fillColor: Colors.white,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 12,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _bankOption(String bankName) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black12),
-      ),
-      child: RadioListTile<String>(
-        value: bankName,
-        groupValue: selectedBank,
-        onChanged: (value) {
-          setState(() {
-            selectedBank = value;
-          });
-        },
-        title: Text(
-          bankName,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-        ),
-        activeColor: const Color(0xFF558B3E),
       ),
     );
   }
