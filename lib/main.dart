@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:regreen/onboarding/landing_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:regreen/auth/login_screen.dart';
+import 'package:regreen/navigation/main_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,13 +14,19 @@ void main() async {
 
   final bool seenOnboarding = pref.getBool('seenOnboarding') ?? false;
 
-  runApp(MyApp(seenOnboarding: seenOnboarding));
+  final bool rememberMe = pref.getBool('remember_me') ?? false;
+
+  runApp(MyApp(seenOnboarding: seenOnboarding, rememberMe: rememberMe));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key, required this.seenOnboarding});
-
+  const MyApp({
+    super.key,
+    required this.seenOnboarding,
+    required this.rememberMe,
+  });
   final bool seenOnboarding;
+  final bool rememberMe;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +37,24 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       debugShowCheckedModeBanner: false,
-      home: seenOnboarding ? const LoginScreen() : const LandingPage(),
+      home: _getStartScreen(),
     );
+  }
+
+  Widget _getStartScreen() {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null && rememberMe) {
+      return const MainScreen();
+    } else {
+      if (user != null && !rememberMe) {
+        FirebaseAuth.instance.signOut();
+      }
+      if (seenOnboarding) {
+        return const LoginScreen();
+      } else {
+        return const LandingPage();
+      }
+    }
   }
 }

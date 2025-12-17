@@ -28,6 +28,22 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _rememberMe = false;
 
   @override
+  void initState() {
+    super.initState();
+    _loadUserEmail();
+  }
+
+  void _loadUserEmail() async {
+    final pref = await SharedPreferences.getInstance();
+    setState(() {
+      _rememberMe = pref.getBool('remember_me') ?? false;
+      if (_rememberMe) {
+        _emailController.text = pref.getString('saved_email') ?? '';
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
@@ -54,6 +70,15 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       await _authService.login(email: email, password: password);
+
+      final pref = await SharedPreferences.getInstance();
+      if (_rememberMe) {
+        await pref.setBool('remember_me', true);
+        await pref.setString('saved_email', email);
+      } else {
+        await pref.remove('remember_me');
+        await pref.remove('saved_email');
+      }
 
       if (!mounted) return;
 
