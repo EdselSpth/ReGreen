@@ -4,11 +4,13 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 class VideoPlayerPage extends StatefulWidget {
   final String youtubeId;
   final String title;
+  final String? deskripsi;
 
   const VideoPlayerPage({
     super.key,
     required this.youtubeId,
     required this.title,
+    this.deskripsi,
   });
 
   @override
@@ -78,8 +80,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
             child: ListView(
               children: [
                 ClipRRect(
-                  borderRadius:
-                      const BorderRadius.vertical(top: Radius.circular(30)),
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(30),
+                  ),
                   child: player,
                 ),
                 Padding(
@@ -120,21 +123,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                               });
                             },
                             child: AnimatedSwitcher(
-                              duration:
-                                  const Duration(milliseconds: 300),
+                              duration: const Duration(milliseconds: 300),
                               transitionBuilder: (child, anim) =>
-                                  ScaleTransition(
-                                scale: anim,
-                                child: child,
-                              ),
+                                  ScaleTransition(scale: anim, child: child),
                               child: Icon(
                                 isLiked
                                     ? Icons.thumb_up
                                     : Icons.thumb_up_outlined,
                                 key: ValueKey(isLiked),
-                                color: isLiked
-                                    ? primaryGreen
-                                    : Colors.black54,
+                                color: isLiked ? primaryGreen : Colors.black54,
                               ),
                             ),
                           ),
@@ -142,9 +139,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           Text(
                             isLiked ? 'Disukai' : 'Suka',
                             style: TextStyle(
-                              color: isLiked
-                                  ? primaryGreen
-                                  : Colors.black54,
+                              color: isLiked ? primaryGreen : Colors.black54,
                             ),
                           ),
                           const SizedBox(width: 20),
@@ -155,8 +150,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                             onTap: () {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(
-                                  content:
-                                      Text('Link berhasil dibagikan'),
+                                  content: Text('Link berhasil dibagikan'),
                                 ),
                               );
                             },
@@ -177,16 +171,15 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Video edukasi tentang pengelolaan sampah dan '
-                              'pentingnya menjaga lingkungan demi masa depan '
-                              'yang lebih bersih dan sehat. '
-                              'Pelajari langkah praktis yang bisa dilakukan '
-                              'sehari-hari.',
+                              widget.deskripsi?.isNotEmpty == true
+                                  ? widget.deskripsi!
+                                  : "Tidak ada deskripsi",
                               maxLines: isExpanded ? null : 3,
                               overflow: isExpanded
                                   ? TextOverflow.visible
                                   : TextOverflow.ellipsis,
                             ),
+
                             const SizedBox(height: 6),
                             InkWell(
                               onTap: () {
@@ -195,9 +188,7 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                 });
                               },
                               child: Text(
-                                isExpanded
-                                    ? 'Tutup'
-                                    : 'Baca selengkapnya',
+                                isExpanded ? 'Tutup' : 'Baca selengkapnya',
                                 style: const TextStyle(
                                   color: primaryGreen,
                                   fontWeight: FontWeight.w600,
