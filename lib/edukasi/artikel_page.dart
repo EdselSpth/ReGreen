@@ -1,46 +1,19 @@
 import 'package:flutter/material.dart';
+import '../../service/api_service_artikel.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ArtikelPage extends StatelessWidget {
   const ArtikelPage({super.key});
 
+  Future<void> _openPdf(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw 'Tidak bisa membuka PDF';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    // Data Dummy Artikel
-    final List<Map<String, String>> articles = [
-      {
-        'title': 'Mengapa Daur Ulang Itu Penting?',
-        'author': 'ReGreen Team',
-        'readTime': '5 min baca',
-        'image': 'Assets/onboarding/ob1-image.png', // Placeholder image
-        'summary':
-            'Daur ulang membantu mengurangi limbah di TPA, menghemat energi, dan melestarikan sumber daya alam kita yang terbatas.',
-      },
-      {
-        'title': 'Panduan Memisahkan Sampah di Rumah',
-        'author': 'Sarah Green',
-        'readTime': '7 min baca',
-        'image': 'Assets/onboarding/ob2-image.png',
-        'summary':
-            'Bingung membedakan sampah organik dan anorganik? Ikuti panduan praktis ini untuk memulai gaya hidup minim sampah.',
-      },
-      {
-        'title': 'Bahaya Sampah Plastik bagi Lautan',
-        'author': 'Dr. Ocean',
-        'readTime': '4 min baca',
-        'image': 'Assets/onboarding/ob3-image.png',
-        'summary':
-            'Jutaan ton plastik berakhir di lautan setiap tahun. Pelajari dampaknya terhadap kehidupan laut dan kesehatan kita.',
-      },
-      {
-        'title': 'Cara Mengubah Sampah Makanan Menjadi Kompos',
-        'author': 'Budi Tani',
-        'readTime': '6 min baca',
-        'image': 'Assets/onboarding/ob1-image.png',
-        'summary':
-            'Jangan buang sisa makananmu! Ubah menjadi pupuk alami yang kaya nutrisi untuk tanaman di halamanmu.',
-      },
-    ];
-
     return Scaffold(
       backgroundColor: const Color(0xFF558B3E),
       appBar: AppBar(
@@ -65,136 +38,120 @@ class ArtikelPage extends StatelessWidget {
             topRight: Radius.circular(30),
           ),
         ),
-        child: ListView.builder(
-          padding: const EdgeInsets.all(20),
-          itemCount: articles.length,
-          itemBuilder: (context, index) {
-            final article = articles[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              color: const Color(0xFFDDE7CC), // Warna kartu hijau muda
-              elevation: 2,
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () {
-                  // Aksi ketika artikel diklik
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text("Membuka artikel: ${article['title']}"),
-                    ),
-                  );
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Gambar Artikel (Full Width di atas)
-                    ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(16),
-                        topRight: Radius.circular(16),
-                      ),
-                      child: Image.asset(
-                        article['image']!,
-                        width: double.infinity,
-                        height: 150,
-                        fit: BoxFit.cover,
-                        alignment: Alignment.topCenter,
-                      ),
-                    ),
+        child: FutureBuilder<List<dynamic>>(
+          future: ApiServiceArtikel.getAllArtikel(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Metadata (Penulis & Waktu)
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.person_outline,
-                                size: 16,
-                                color: Color(0xFF558B3E),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                article['author']!,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF558B3E),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(width: 16),
-                              const Icon(
-                                Icons.access_time,
-                                size: 16,
-                                color: Color(0xFF558B3E),
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                article['readTime']!,
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF558B3E),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 10),
-
-                          // Judul
-                          Text(
-                            article['title']!,
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-
-                          // Ringkasan
-                          Text(
-                            article['summary']!,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87.withOpacity(0.7),
-                              height: 1.4,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // Tombol Baca Selengkapnya Kecil
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: const [
-                              Text(
-                                "Baca Selengkapnya",
-                                style: TextStyle(
-                                  color: Color(0xFF558B3E),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 12,
-                                color: Color(0xFF558B3E),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+            if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Center(
+                child: Text(
+                  "Belum ada artikel",
+                  style: TextStyle(fontSize: 16),
                 ),
-              ),
+              );
+            }
+
+            final articles = snapshot.data!;
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: articles.length,
+              itemBuilder: (context, index) {
+                final article = articles[index];
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  color: const Color(0xFFDDE7CC),
+                  elevation: 2,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () => _openPdf(article['file_pdf']),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Header Image (Static / Placeholder)
+                        ClipRRect(
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                          child: Image.asset(
+                            'Assets/onboarding/ob1-image.png',
+                            width: double.infinity,
+                            height: 140,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Metadata
+                              Row(
+                                children: const [
+                                  Icon(Icons.picture_as_pdf,
+                                      size: 16,
+                                      color: Color(0xFF558B3E)),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    "Artikel Edukasi",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF558B3E),
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+
+                              // Title
+                              Text(
+                                article['nama_artikel'],
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+
+                              // Action
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: const [
+                                  Text(
+                                    "Baca PDF",
+                                    style: TextStyle(
+                                      color: Color(0xFF558B3E),
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                  SizedBox(width: 4),
+                                  Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 12,
+                                    color: Color(0xFF558B3E),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             );
           },
         ),
