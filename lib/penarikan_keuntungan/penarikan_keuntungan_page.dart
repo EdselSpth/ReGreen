@@ -4,7 +4,6 @@ import '../Service/api_service_keuntungan.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../service/user_service.dart';
 
-
 class PenarikanKeuntunganPage extends StatefulWidget {
   const PenarikanKeuntunganPage({super.key});
 
@@ -201,47 +200,49 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
                         ),
                       ),
                       onPressed: getNominalValue() >= 20000
-    ? () async {
-        final user = FirebaseAuth.instance.currentUser;
-        if (user == null) return;
+                          ? () async {
+                              final user = FirebaseAuth.instance.currentUser;
+                              if (user == null) return;
 
-        final profile =
-            await UserService.getUserProfile(user.uid);
+                              final profile = await UserService.getUserProfile(
+                                user.uid,
+                              );
 
-        if (profile == null ||
-            profile['bankAccount'] == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Data rekening belum lengkap"),
-            ),
-          );
-          return;
-        }
+                              if (profile == null ||
+                                  profile['bankAccount'] == null) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      "Data rekening belum lengkap",
+                                    ),
+                                  ),
+                                );
+                                return;
+                              }
 
-        await ApiServiceKeuntungan.tarikKeuntungan(
-          firebaseUid: user.uid,
-          namaPengguna: profile['username'],
-          nominal: getNominalValue(),
-          rekening: profile['bankAccount']['accountNumber'],
-          metode: profile['bankAccount']['bankName'],
-        );
+                              await ApiServiceKeuntungan.tarikKeuntungan(
+                                firebaseUid: user.uid,
+                                namaPengguna: profile['username'],
+                                nominal: getNominalValue(),
+                                rekening:
+                                    profile['bankAccount']['accountNumber'],
+                                metode: profile['bankAccount']['bankName'],
+                              );
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text(
-              "Penarikan berhasil diajukan",
-            ),
-          ),
-        );
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text("Penarikan berhasil diajukan"),
+                                ),
+                              );
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => const StatusPenarikanPage(),
-          ),
-        );
-      }
-    : null,
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const StatusPenarikanPage(),
+                                ),
+                              );
+                            }
+                          : null,
 
                       child: const Text(
                         'Tarik',
