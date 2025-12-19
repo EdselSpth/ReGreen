@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:regreen/penarikan_keuntungan/penarikan_keuntungan_page.dart';
+import 'package:regreen/penarikan_keuntungan/status_penarikan_page.dart';
 import 'dart:convert';
 
 class HomePage extends StatefulWidget {
@@ -15,10 +16,17 @@ class _HomePageState extends State<HomePage> {
   String _userName = 'ReGreeners';
   String? _photoBase64;
 
+  bool _isAreaRegistered = false;
+  bool _loadingArea = true;
+  String? _userKecamatan;
+
+  bool _hasValidAddress = false;
+
   @override
   void initState() {
     super.initState();
     _fetchUserName();
+    _checkUserArea();
   }
 
   Future<void> _fetchUserName() async {
@@ -44,6 +52,59 @@ class _HomePageState extends State<HomePage> {
         }
       } catch (e) {
         debugPrint("Error mengambil data user: $e");
+      }
+    }
+  }
+
+  Future<void> _checkUserArea() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (!userDoc.exists) {
+        if (mounted) {
+          setState(() => _loadingArea = false);
+        }
+        return;
+      }
+
+      final data = userDoc.data();
+      final address = data?['address'];
+
+      if (address == null || address['kecamatan'] == null) {
+        if (mounted) {
+          setState(() {
+            _hasValidAddress = false;
+            _loadingArea = false;
+          });
+        }
+        return;
+      }
+
+      _hasValidAddress = true;
+      _userKecamatan = address['kecamatan'];
+
+      final areaSnapshot = await FirebaseFirestore.instance
+          .collection('registered_areas')
+          .where('kecamatan', isEqualTo: _userKecamatan)
+          .limit(1)
+          .get();
+
+      if (mounted) {
+        setState(() {
+          _isAreaRegistered = areaSnapshot.docs.isNotEmpty;
+          _loadingArea = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("Error cek area: $e");
+      if (mounted) {
+        setState(() => _loadingArea = false);
       }
     }
   }
@@ -163,100 +224,136 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
                       ),
+
+                      const SizedBox(height: 12),
+
+                      InkWell(
+                        borderRadius: BorderRadius.circular(16),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const StatusPenarikanPage(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDDE7CC),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: const EdgeInsets.all(14),
+                          child: Row(
+                            children: const [
+                              Icon(Icons.history, color: Color(0xFF558B3E)),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'Cek Status Penarikan',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: Colors.black45,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
                       const SizedBox(height: 18),
                       const Divider(color: Colors.black26, thickness: 1),
                       const SizedBox(height: 18),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: const [
-                          Text(
-                            'Jadwal Pengambilan',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            'Detail',
-                            style: TextStyle(
-                              color: Color(0xFF558B3E),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDDE7CC),
-                          borderRadius: BorderRadius.circular(16),
+                      if (_loadingArea) ...[
+                        const Center(child: CircularProgressIndicator()),
+                      ] else if (!_hasValidAddress) ...[
+                        _jadwalMessage(
+                          'Lengkapi alamatmu terlebih dahulu untuk melihat jadwal pengambilan',
                         ),
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Senin, 19 Mei 2025',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    '07:00 - 09:00',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  const Text(
-                                    'Sampah : Organik, Plastik\nKurir : Abdul Azis Saepurohmat',
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF558B3E),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 4,
-                                      horizontal: 8,
-                                    ),
-                                    child: const Text(
-                                      'Terdaftar',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                      ] else if (!_isAreaRegistered) ...[
+                        _jadwalMessage(
+                          'Alamatmu belum terdaftar di area pengambilan',
+                        ),
+                      ] else ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: const [
+                            Text(
+                              'Jadwal Pengambilan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.asset(
-                                'Assets/kurir.jpg',
-                                width: 80,
-                                height: 80,
-                                fit: BoxFit.cover,
+                            Text(
+                              'Detail',
+                              style: TextStyle(
+                                color: Color(0xFF558B3E),
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDDE7CC),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: const [
+                                    Text(
+                                      'Senin, 19 Mei 2025',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      '07:00 - 09:00',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 4),
+                                    Text(
+                                      'Sampah : Organik, Plastik\nKurir : Abdul Azis Saepurohmat',
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.asset(
+                                  'Assets/kurir.jpg',
+                                  width: 80,
+                                  height: 80,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -265,6 +362,15 @@ class _HomePageState extends State<HomePage> {
                             child: _actionButton(
                               icon: Icons.attach_money,
                               label: 'Tarik Keuntungan',
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const PenarikanKeuntunganPage(),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -286,40 +392,45 @@ class _HomePageState extends State<HomePage> {
                         padding: const EdgeInsets.all(14),
                         child: Column(
                           children: [
-                            const Text(
-                              'Areamu Belum Terdaftar?',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Ayo daftarkan sekarang agar sampahmu dijemput!!',
-                              style: TextStyle(fontSize: 13),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 10),
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF558B3E),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 32,
-                                  vertical: 12,
-                                ),
-                              ),
-                              onPressed: () {},
-                              child: const Text(
-                                'Daftar Sekarang!!',
-                                style: TextStyle(
-                                  color: Colors.white,
+                            if (_loadingArea)
+                              const CircularProgressIndicator()
+                            else ...[
+                              Text(
+                                _isAreaRegistered
+                                    ? 'Areamu Sudah Terdaftar 🎉'
+                                    : 'Areamu Belum Terdaftar?',
+                                style: const TextStyle(
                                   fontWeight: FontWeight.bold,
+                                  fontSize: 15,
                                 ),
                               ),
-                            ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _isAreaRegistered
+                                    ? 'Area $_userKecamatan sudah aktif.\nKamu bisa langsung melakukan penjemputan.'
+                                    : 'Ayo daftarkan sekarang agar sampahmu dijemput!!',
+                                style: const TextStyle(fontSize: 13),
+                                textAlign: TextAlign.center,
+                              ),
+                              if (!_isAreaRegistered) ...[
+                                const SizedBox(height: 10),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF558B3E),
+                                  ),
+                                  onPressed: () {
+                                    // ke halaman daftar area
+                                  },
+                                  child: const Text(
+                                    'Daftar Sekarang!!',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ],
                           ],
                         ),
                       ),
@@ -335,23 +446,51 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _actionButton({required IconData icon, required String label}) {
+  Widget _actionButton({
+    required IconData icon,
+    required String label,
+    VoidCallback? onTap,
+  }) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFFDDE7CC),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        child: Column(
+          children: [
+            Icon(icon, color: const Color(0xFF558B3E), size: 26),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _jadwalMessage(String text) {
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         color: const Color(0xFFDDE7CC),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(16),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Column(
-        children: [
-          Icon(icon, color: const Color(0xFF558B3E), size: 26),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-          ),
-        ],
+      padding: const EdgeInsets.all(14),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+          color: Colors.black54,
+        ),
       ),
     );
   }
