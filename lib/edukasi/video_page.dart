@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import '../../service/api_service_video.dart';
 import 'video_player_page.dart';
 
 class VideoPage extends StatelessWidget {
@@ -6,29 +8,6 @@ class VideoPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, String>> videos = [
-      {
-        'title': 'Mengapa Daur Ulang Penting',
-        'duration': '05:54',
-        'youtubeId': 'M2BtJdgzo-E',
-      },
-      {
-        'title': 'Memilah Sampah di Rumah',
-        'duration': '07:17',
-        'youtubeId': 'zfJLbjN-O98',
-      },
-      {
-        'title': 'Bahaya Senyap Mikroplastik',
-        'duration': '05:10',
-        'youtubeId': 'wDqu0SRjjWE',
-      },
-      {
-        'title': 'Kompos Sampah Makanan di Rumah',
-        'duration': '05:09',
-        'youtubeId': 'RhEHoyYPtTM',
-      },
-    ];
-
     return Scaffold(
       backgroundColor: const Color(0xFF558B3E),
       appBar: AppBar(
@@ -49,76 +28,95 @@ class VideoPage extends StatelessWidget {
           color: Color(0xFFE8EDDE),
           borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
         ),
-        child: ListView.builder(
-          padding: const EdgeInsets.all(20),
-          itemCount: videos.length,
-          itemBuilder: (context, index) {
-            final video = videos[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              color: const Color(0xFFDDE7CC),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(16),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => VideoPlayerPage(
-                        youtubeId: video['youtubeId']!,
-                        title: video['title']!,
-                      ),
-                    ),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Image.network(
-                          'https://img.youtube.com/vi/${video['youtubeId']}/0.jpg',
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
+        child: FutureBuilder<List<dynamic>>(
+          future: ApiServiceVideo.getAllVideo(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (snapshot.hasError || !snapshot.hasData) {
+              return const Center(child: Text("Gagal memuat video"));
+            }
+
+            final videos = snapshot.data!;
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(20),
+              itemCount: videos.length,
+              itemBuilder: (context, index) {
+                final video = videos[index];
+                final youtubeId =
+                    YoutubePlayer.convertUrlToId(video['link_youtube']);
+
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  color: const Color(0xFFDDE7CC),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(16),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => VideoPlayerPage(
+                            youtubeId: youtubeId!,
+                            title: video['nama_video'],
+                            deskripsi: video['deskripsi'],
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              video['title']!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                      );
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              'https://img.youtube.com/vi/$youtubeId/0.jpg',
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
                             ),
-                            const SizedBox(height: 6),
-                            Row(
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                const Icon(Icons.access_time, size: 14),
-                                const SizedBox(width: 4),
-                                Text(video['duration']!),
+                                Text(
+                                  video['nama_video'],
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 6),
+                                const Row(
+                                  children: [
+                                    Icon(Icons.play_circle_outline, size: 14),
+                                    SizedBox(width: 4),
+                                    Text("YouTube"),
+                                  ],
+                                ),
                               ],
                             ),
-                          ],
-                        ),
+                          ),
+                          const Icon(
+                            Icons.play_circle_fill,
+                            size: 32,
+                            color: Color(0xFF558B3E),
+                          ),
+                        ],
                       ),
-                      const Icon(
-                        Icons.play_circle_fill,
-                        size: 32,
-                        color: Color(0xFF558B3E),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
+                );
+              },
             );
           },
         ),
