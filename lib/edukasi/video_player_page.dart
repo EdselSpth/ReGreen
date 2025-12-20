@@ -21,7 +21,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
   late YoutubePlayerController _controller;
   late String currentTitle;
 
-  bool isLiked = false;
   bool isExpanded = false;
 
   static const Color primaryGreen = Color(0xFF558B3E);
@@ -113,36 +112,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
                       const SizedBox(height: 12),
 
-                      /// ===== ACTION BUTTONS =====
+                      /// ===== ACTION BUTTONS (ONLY SHARE) =====
                       Row(
                         children: [
-                          InkWell(
-                            onTap: () {
-                              setState(() {
-                                isLiked = !isLiked;
-                              });
-                            },
-                            child: AnimatedSwitcher(
-                              duration: const Duration(milliseconds: 300),
-                              transitionBuilder: (child, anim) =>
-                                  ScaleTransition(scale: anim, child: child),
-                              child: Icon(
-                                isLiked
-                                    ? Icons.thumb_up
-                                    : Icons.thumb_up_outlined,
-                                key: ValueKey(isLiked),
-                                color: isLiked ? primaryGreen : Colors.black54,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Text(
-                            isLiked ? 'Disukai' : 'Suka',
-                            style: TextStyle(
-                              color: isLiked ? primaryGreen : Colors.black54,
-                            ),
-                          ),
-                          const SizedBox(width: 20),
                           _ActionButton(
                             icon: Icons.share,
                             label: 'Bagikan',
@@ -179,7 +151,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                                   ? TextOverflow.visible
                                   : TextOverflow.ellipsis,
                             ),
-
                             const SizedBox(height: 6),
                             InkWell(
                               onTap: () {
