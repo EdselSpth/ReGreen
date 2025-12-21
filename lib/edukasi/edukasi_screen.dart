@@ -25,7 +25,13 @@ class EdukasiScreen extends StatelessWidget {
       body: Container(
         width: double.infinity,
         height: double.infinity,
-        decoration: const BoxDecoration(color: Color(0xFFE8EDDE)),
+        decoration: const BoxDecoration(
+          color: Color(0xFFE8EDDE),
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(

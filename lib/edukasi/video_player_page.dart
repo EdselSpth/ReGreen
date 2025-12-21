@@ -109,27 +109,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                           Chip(label: Text('Sampah')),
                         ],
                       ),
-
-                      const SizedBox(height: 12),
-
-                      /// ===== ACTION BUTTONS (ONLY SHARE) =====
-                      Row(
-                        children: [
-                          _ActionButton(
-                            icon: Icons.share,
-                            label: 'Bagikan',
-                            color: Colors.black54,
-                            onTap: () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Link berhasil dibagikan'),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-
                       const SizedBox(height: 16),
 
                       /// ===== DESCRIPTION =====
@@ -177,34 +156,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
           ),
         );
       },
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _ActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Row(
-        children: [
-          Icon(icon, color: color),
-          const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: color)),
-        ],
-      ),
     );
   }
 }
