@@ -16,6 +16,10 @@ class _HomePageState extends State<HomePage> {
   String _userName = 'ReGreeners';
   String? _photoBase64;
 
+  int _saldo = 0;
+  bool _loadingSaldo = true;
+  bool _hideSaldo = true;
+
   bool _isAreaRegistered = false;
   bool _loadingArea = true;
   String? _userKecamatan;
@@ -26,6 +30,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _fetchUserName();
+    _fetchSaldo();
     _checkUserArea();
   }
 
@@ -52,6 +57,33 @@ class _HomePageState extends State<HomePage> {
         }
       } catch (e) {
         debugPrint("Error mengambil data user: $e");
+      }
+    }
+  }
+
+  Future<void> _fetchSaldo() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists) {
+        final data = userDoc.data();
+        if (mounted) {
+          setState(() {
+            _saldo = (data?['balance'] ?? 0).toInt(); // ← FIX DI SINI
+            _loadingSaldo = false;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Error mengambil saldo: $e');
+      if (mounted) {
+        setState(() => _loadingSaldo = false);
       }
     }
   }
@@ -181,24 +213,54 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
-                              children: const [
-                                Text(
+                              children: [
+                                const Text(
                                   'SALDO',
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black54,
                                   ),
                                 ),
-                                SizedBox(height: 8),
-                                Text(
-                                  'Rp. 200.000.000,00',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 18,
-                                  ),
-                                ),
+                                const SizedBox(height: 8),
+                                _loadingSaldo
+                                    ? const Text(
+                                        'Memuat...',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 18,
+                                        ),
+                                      )
+                                    : Row(
+                                        children: [
+                                          Text(
+                                            _hideSaldo
+                                                ? 'Rp ••••••••'
+                                                : formatRupiah(_saldo),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          GestureDetector(
+                                            onTap: () {
+                                              setState(() {
+                                                _hideSaldo = !_hideSaldo;
+                                              });
+                                            },
+                                            child: Icon(
+                                              _hideSaldo
+                                                  ? Icons.visibility_off
+                                                  : Icons.visibility,
+                                              size: 20,
+                                              color: Colors.black54,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                               ],
                             ),
+
                             GestureDetector(
                               onTap: () {
                                 Navigator.push(
@@ -493,5 +555,21 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  String formatRupiah(int value) {
+    final String number = value.toString();
+    final StringBuffer buffer = StringBuffer();
+    int counter = 0;
+
+    for (int i = number.length - 1; i >= 0; i--) {
+      buffer.write(number[i]);
+      counter++;
+      if (counter % 3 == 0 && i != 0) {
+        buffer.write('.');
+      }
+    }
+
+    return 'Rp ${buffer.toString().split('').reversed.join()}';
   }
 }
