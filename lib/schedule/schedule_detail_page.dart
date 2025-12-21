@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:regreen/service/schedule_service.dart';
 
 class ScheduleDetailPage extends StatefulWidget {
   final String courierName;
@@ -23,39 +22,31 @@ class ScheduleDetailPage extends StatefulWidget {
 }
 
 class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
+  final ScheduleService _service = ScheduleService();
+
   bool _isLoading = false;
   bool _alreadySubmitted = false;
 
-  Future<void> _submitPenjemputan() async {
+  final String _address =
+      "Komplek Taman Bumi Prima Blok O No 8, Kecamatan Cibabat, Kelurahan Cimahi Utara, Kota Cimahi 40513";
+
+  Future<void> _handleSubmit() async {
     setState(() => _isLoading = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      await _service.submitPenjemputan(
+        courierName: widget.courierName,
+        scheduleDate: widget.scheduleDate,
+        scheduleTime: widget.scheduleTime,
+        wasteTypes: widget.wasteTypes,
+        address: _address,
+      );
 
-      if (user == null) {
-        _showDialog("Gagal", "User belum login");
-        return;
-      }
-
-      await FirebaseFirestore.instance.collection('penjemputan').add({
-        "userId": user.uid,
-        "courierName": widget.courierName,
-        "scheduleDate": widget.scheduleDate,
-        "scheduleTime": widget.scheduleTime,
-        "wasteTypes": widget.wasteTypes,
-        "address":
-            "Komplek Taman Bumi Prima Blok O No 8, Kecamatan Cibabat, Kelurahan Cimahi Utara, Kota Cimahi 40513",
-        "status": "menunggu",
-        "createdAt": FieldValue.serverTimestamp(),
-      });
-
-      setState(() {
-        _alreadySubmitted = true;
-      });
+      setState(() => _alreadySubmitted = true);
 
       _showDialog("Berhasil", "Penjemputan berhasil didaftarkan");
     } catch (e) {
-      _showDialog("Error", "Terjadi kesalahan saat menyimpan data");
+      _showDialog("Gagal", e.toString());
     } finally {
       setState(() => _isLoading = false);
     }
@@ -116,7 +107,7 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
               ),
             ),
 
-            // WHITE CONTENT AREA
+            // CONTENT
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -132,7 +123,6 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // IMAGE
                       Center(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(18),
@@ -147,51 +137,26 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
                       const SizedBox(height: 30),
 
                       _label("Nama Kurir"),
-                      _boxText(widget.courierName),
+                      _box(widget.courierName),
 
                       _label("Detail Jadwal"),
-                      _boxText(widget.scheduleDate),
+                      _box(widget.scheduleDate),
 
                       _label("Detail Waktu"),
-                      _boxText(widget.scheduleTime),
+                      _box(widget.scheduleTime),
 
                       _label("Jenis Sampah"),
-                      _boxText(widget.wasteTypes),
+                      _box(widget.wasteTypes),
 
                       _label("Alamat Anda"),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFDFE4D5),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFF558B3E)),
-                        ),
-                        child: const Text(
-                          "Komplek Taman Bumi Prima Blok O No 8, Kecamatan Cibabat, Kelurahan Cimahi Utara, Kota Cimahi 40513",
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 5),
-                      const Center(
-                        child: Text(
-                          "Keren areamu udah terdaftar!",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
+                      _box(_address),
+
                       const SizedBox(height: 25),
 
-                      // BUTTON
                       GestureDetector(
                         onTap: (_isLoading || _alreadySubmitted)
                             ? null
-                            : _submitPenjemputan,
+                            : _handleSubmit,
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 14),
@@ -230,28 +195,24 @@ class _ScheduleDetailPageState extends State<ScheduleDetailPage> {
     );
   }
 
-  Widget _label(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4, top: 14),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-      ),
-    );
-  }
+  Widget _label(String text) => Padding(
+    padding: const EdgeInsets.only(bottom: 4, top: 14),
+    child: Text(
+      text,
+      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
+    ),
+  );
 
-  Widget _boxText(String text) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: const Color(0xFFDDE7CC),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
+  Widget _box(String text) => Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: const Color(0xFFDDE7CC),
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Text(
+      text,
+      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+    ),
+  );
 }
