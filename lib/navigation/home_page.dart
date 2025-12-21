@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:regreen/penarikan_area/penarikan_area_page.dart';
 import 'package:regreen/penarikan_keuntungan/penarikan_keuntungan_page.dart';
 import 'package:regreen/penarikan_keuntungan/status_penarikan_page.dart';
 import 'dart:convert';
 import 'package:regreen/penarikan_area/penarikan_area_page.dart';
+import 'package:regreen/Model/area_status.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,7 +22,7 @@ class _HomePageState extends State<HomePage> {
   bool _loadingSaldo = true;
   bool _hideSaldo = true;
 
-  bool _isAreaRegistered = false;
+  AreaStatus _areaStatus = AreaStatus.notRegistered;
   bool _loadingArea = true;
   String? _userKecamatan;
 
@@ -123,18 +123,12 @@ class _HomePageState extends State<HomePage> {
       _hasValidAddress = true;
       _userKecamatan = address['kecamatan'];
 
-      final areaSnapshot = await FirebaseFirestore.instance
-          .collection('registered_areas')
-          .where('kecamatan', isEqualTo: _userKecamatan)
-          .limit(1)
-          .get();
+      final status = data?['areaStatus'];
 
-      if (mounted) {
-        setState(() {
-          _isAreaRegistered = areaSnapshot.docs.isNotEmpty;
-          _loadingArea = false;
-        });
-      }
+      setState(() {
+        _areaStatus = areaStatusFromString(status);
+        _loadingArea = false;
+      });
     } catch (e) {
       debugPrint("Error cek area: $e");
       if (mounted) {
@@ -145,6 +139,28 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    String areaTitle = '';
+    String areaDesc = '';
+    bool showRegisterButton = false;
+
+    switch (_areaStatus) {
+      case AreaStatus.notRegistered:
+        areaTitle = 'Areamu Belum Terdaftar?';
+        areaDesc = 'Ayo daftarkan sekarang agar sampahmu dijemput!!';
+        showRegisterButton = true;
+        break;
+
+      case AreaStatus.pending:
+        areaTitle = 'Areamu Sedang Diverifikasi';
+        areaDesc = 'Pendaftaran area kamu sedang ditinjau admin.';
+        break;
+
+      case AreaStatus.approved:
+        areaTitle = 'Areamu Sudah Terdaftar 🎉';
+        areaDesc =
+            'Area $_userKecamatan sudah aktif.\nKamu bisa langsung melakukan penjemputan.';
+        break;
+    }
     ImageProvider profileImage;
     if (_photoBase64 != null && _photoBase64!.isNotEmpty) {
       try {
@@ -332,19 +348,20 @@ class _HomePageState extends State<HomePage> {
                       ),
 
                       const SizedBox(height: 18),
-                      const Divider(color: Colors.black26, thickness: 1),
-                      const SizedBox(height: 18),
                       if (_loadingArea) ...[
                         const Center(child: CircularProgressIndicator()),
                       ] else if (!_hasValidAddress) ...[
                         _jadwalMessage(
                           'Lengkapi alamatmu terlebih dahulu untuk melihat jadwal pengambilan',
                         ),
-                      ] else if (!_isAreaRegistered) ...[
+                      ] else if (_areaStatus != AreaStatus.approved) ...[
                         _jadwalMessage(
-                          'Alamatmu belum terdaftar di area pengambilan',
+                          _areaStatus == AreaStatus.pending
+                              ? 'Area kamu sedang diverifikasi'
+                              : 'Alamatmu belum terdaftar di area pengambilan',
                         ),
                       ] else ...[
+                        // === JADWAL PENGAMBILAN (APPROVED ONLY) ===
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: const [
@@ -367,57 +384,14 @@ class _HomePageState extends State<HomePage> {
                         const SizedBox(height: 8),
                         Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFFDDE7CC),
+                            color: Color(0xFFDDE7CC),
                             borderRadius: BorderRadius.circular(16),
                           ),
                           padding: const EdgeInsets.all(12),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const [
-                                    Text(
-                                      'Senin, 19 Mei 2025',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      '07:00 - 09:00',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    SizedBox(height: 4),
-                                    Text(
-                                      'Sampah : Organik, Plastik\nKurir : Abdul Azis Saepurohmat',
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.asset(
-                                  'Assets/kurir.jpg',
-                                  width: 80,
-                                  height: 80,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: const Text('Jadwal di sini'),
                         ),
                       ],
+
                       const SizedBox(height: 18),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -460,36 +434,39 @@ class _HomePageState extends State<HomePage> {
                               const CircularProgressIndicator()
                             else ...[
                               Text(
-                                _isAreaRegistered
-                                    ? 'Areamu Sudah Terdaftar 🎉'
-                                    : 'Areamu Belum Terdaftar?',
+                                areaTitle,
                                 style: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
                                 ),
                               ),
                               const SizedBox(height: 4),
+
+                              const SizedBox(height: 4),
                               Text(
-                                _isAreaRegistered
-                                    ? 'Area $_userKecamatan sudah aktif.\nKamu bisa langsung melakukan penjemputan.'
-                                    : 'Ayo daftarkan sekarang agar sampahmu dijemput!!',
+                                areaDesc,
                                 style: const TextStyle(fontSize: 13),
                                 textAlign: TextAlign.center,
                               ),
-                              if (!_isAreaRegistered) ...[
+
+                              if (showRegisterButton) ...[
                                 const SizedBox(height: 10),
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: const Color(0xFF558B3E),
                                   ),
-                                  onPressed: () {
-                                    Navigator.push(
+                                  onPressed: () async {
+                                    final result = await Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
+                                        builder: (_) =>
                                             const PendaftaranAreaPage(),
                                       ),
                                     );
+
+                                    if (result == true) {
+                                      _checkUserArea(); // refresh status
+                                    }
                                   },
                                   child: const Text(
                                     'Daftar Sekarang!!',

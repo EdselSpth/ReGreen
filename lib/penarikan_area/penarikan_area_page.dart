@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import '../Model/area_model.dart';
+import '../Model/area_status.dart';
 import '../Service/area_service.dart';
 import '../Service/user_service.dart';
 
@@ -20,7 +24,6 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
 
   bool isLoading = true;
   bool allowManualInput = false;
-  bool isAreaRegistered = false;
 
   @override
   void initState() {
@@ -45,19 +48,18 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     kecamatanCtrl.text = address['kecamatan'] ?? '';
     kelurahanCtrl.text = address['kelurahan'] ?? '';
 
-    final registered = await AreaService.isAreaRegistered(kecamatanCtrl.text);
-
     setState(() {
       allowManualInput = false;
-      isAreaRegistered = registered;
       isLoading = false;
     });
   }
 
-  Future<void> submitArea() async {
+  Future<void> _submitArea() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => isLoading = true);
+
+    final uid = FirebaseAuth.instance.currentUser!.uid;
 
     final area = AreaModel(
       provinsi: provinsiCtrl.text,
@@ -67,13 +69,22 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     );
 
     try {
+      // ⛔ AreaService TIDAK DIUBAH
       await AreaService.createArea(area);
+
+      // 🔥 Update status user ke Firestore
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'areaStatus': 'pending',
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Area berhasil didaftarkan')),
+          const SnackBar(
+            content: Text('Area berhasil didaftarkan, menunggu verifikasi'),
+          ),
         );
-        Navigator.pop(context, true);
+
+        Navigator.pop(context, true); // 🔥 INI PENTING
       }
     } catch (_) {
       ScaffoldMessenger.of(
@@ -90,61 +101,115 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Pendaftaran Area'),
-        backgroundColor: const Color(0xFF5C8E3E),
-      ),
-      backgroundColor: const Color(0xFFEFF3E8),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              _inputField('Provinsi', provinsiCtrl),
-              _inputField('Kota', kotaCtrl),
-              _inputField('Kecamatan', kecamatanCtrl),
-              _inputField('Kelurahan', kelurahanCtrl),
-              const SizedBox(height: 24),
+    final uid = FirebaseAuth.instance.currentUser!.uid;
 
-              if (!isAreaRegistered)
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: submitArea,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF5C8E3E),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists) {
+          return const Scaffold(
+            body: Center(child: Text('Data user tidak ditemukan')),
+          );
+        }
+
+        final userData = snapshot.data!.data() as Map<String, dynamic>;
+        final areaStatus = areaStatusFromString(userData['areaStatus']);
+
+        final bool isEditable = areaStatus == AreaStatus.notRegistered;
+
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Pendaftaran Area'),
+            backgroundColor: const Color(0xFF5C8E3E),
+          ),
+          backgroundColor: const Color(0xFFEFF3E8),
+          body: Form(
+            key: _formKey,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _statusInfo(areaStatus),
+                  const SizedBox(height: 12),
+
+                  _inputField('Provinsi', provinsiCtrl, isEditable),
+                  _inputField('Kota', kotaCtrl, isEditable),
+                  _inputField('Kecamatan', kecamatanCtrl, isEditable),
+                  _inputField('Kelurahan', kelurahanCtrl, isEditable),
+
+                  const SizedBox(height: 24),
+
+                  if (isEditable)
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _submitArea,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF5C8E3E),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Daftarkan Area'),
                       ),
                     ),
-                    child: const Text('Daftarkan Area'),
-                  ),
-                ),
-
-              if (isAreaRegistered)
-                const Padding(
-                  padding: EdgeInsets.only(top: 12),
-                  child: Text(
-                    'Area sudah terdaftar 🎉',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-            ],
+                ],
+              ),
+            ),
           ),
-        ),
+        );
+      },
+    );
+  }
+
+  Widget _statusInfo(AreaStatus status) {
+    switch (status) {
+      case AreaStatus.pending:
+        return _infoBox(
+          'Area sedang diverifikasi.\nData tidak dapat diubah.',
+          Icons.hourglass_top,
+        );
+      case AreaStatus.approved:
+        return _infoBox(
+          'Area sudah disetujui.\nPendaftaran tidak dapat diubah.',
+          Icons.verified,
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _infoBox(String text, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.orange.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.orange),
+          const SizedBox(width: 12),
+          Expanded(child: Text(text)),
+        ],
       ),
     );
   }
 
-  Widget _inputField(String label, TextEditingController controller) {
+  Widget _inputField(
+    String label,
+    TextEditingController controller,
+    bool enabled,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
         controller: controller,
-        readOnly: !allowManualInput,
+        enabled: enabled,
         validator: (v) => v == null || v.isEmpty ? 'Wajib diisi' : null,
         decoration: InputDecoration(
           labelText: label,

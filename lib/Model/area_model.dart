@@ -1,3 +1,5 @@
+import 'package:regreen/Model/area_status.dart';
+
 class AreaModel {
   final int? id;
   final String kecamatan;
