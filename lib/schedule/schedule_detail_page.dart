@@ -65,6 +65,7 @@ class ScheduleDetailPage extends StatelessWidget {
               },
               child: const Text("Ajukan Penjemputan"),
             ),
+            
           ],
         ),
       ),
