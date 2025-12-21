@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:regreen/penarikan_keuntungan/penarikan_keuntungan_page.dart';
 import 'package:regreen/penarikan_keuntungan/status_penarikan_page.dart';
 import 'dart:convert';
+import 'package:regreen/penarikan_area.dart/penarikan_area_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -481,7 +482,13 @@ class _HomePageState extends State<HomePage> {
                                     backgroundColor: const Color(0xFF558B3E),
                                   ),
                                   onPressed: () {
-                                    // ke halaman daftar area
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const PendaftaranAreaPage(),
+                                      ),
+                                    );
                                   },
                                   child: const Text(
                                     'Daftar Sekarang!!',
