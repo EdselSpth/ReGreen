@@ -1,22 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../Model/area_model.dart';
 
 class ScheduleService {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  User? getCurrentUser() {
-    return _auth.currentUser;
-  }
-
-  // ✅ WAJIB ADA
   String buildAddress(AreaModel area) {
-    return
-        "Kecamatan ${area.kecamatan}, "
-        "Kelurahan ${area.kelurahan}, "
-        "Kota ${area.kota}, "
-        "Provinsi ${area.provinsi}";
+    return "${area.kelurahan}, ${area.kecamatan}, "
+        "${area.kota}, ${area.provinsi}";
   }
 
   Future<void> submitPenjemputan({
@@ -26,24 +16,39 @@ class ScheduleService {
     required String wasteTypes,
     required AreaModel area,
   }) async {
-    final user = getCurrentUser();
+    final jadwalQuery = await _firestore
+        .collection('jadwal')
+        .where('courierName', isEqualTo: courierName)
+        .where('date', isEqualTo: scheduleDate)
+        .where('time', isEqualTo: scheduleTime)
+        .limit(1)
+        .get();
 
-    if (user == null) {
-      throw Exception("User belum login");
+    if (jadwalQuery.docs.isEmpty) {
+      throw Exception("Jadwal tidak ditemukan");
     }
 
-    final address = buildAddress(area);
+    final jadwalDoc = jadwalQuery.docs.first;
+    final status = jadwalDoc['status'];
 
+    if (status != 'tersedia') {
+      throw Exception("Jadwal sudah diambil");
+    }
+
+    // Simpan pengajuan
     await _firestore.collection('penjemputan').add({
-      "userId": user.uid,
-      "courierName": courierName,
-      "scheduleDate": scheduleDate,
-      "scheduleTime": scheduleTime,
-      "wasteTypes": wasteTypes,
-      "address": address,
-      "area": area.toJson(),
-      "status": "menunggu",
-      "createdAt": FieldValue.serverTimestamp(),
+      'courierName': courierName,
+      'date': scheduleDate,
+      'time': scheduleTime,
+      'wasteTypes': wasteTypes,
+      'alamat': buildAddress(area),
+      'status': 'menunggu',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    // Update status jadwal
+    await jadwalDoc.reference.update({
+      'status': 'diambil',
     });
   }
 }
