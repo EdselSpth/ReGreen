@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:regreen/Model/area_status.dart';
 
 class UserModel {
   final String uid;
@@ -9,6 +10,9 @@ class UserModel {
   final String? photoUrl;
   final DateTime? createdAt;
 
+  final AreaStatus areaStatus;
+  final String? areaId;
+
   UserModel({
     required this.uid,
     required this.username,
@@ -17,6 +21,8 @@ class UserModel {
     this.address,
     this.photoUrl,
     this.createdAt,
+    this.areaStatus = AreaStatus.notRegistered,
+    this.areaId,
   });
 
   factory UserModel.fromMap(Map<String, dynamic> map) {
@@ -30,6 +36,9 @@ class UserModel {
       createdAt: map['createdAt'] != null
           ? (map['createdAt'] as Timestamp).toDate()
           : null,
+
+      areaStatus: areaStatusFromString(map['areaStatus']),
+      areaId: map['areaId'],
     );
   }
 
@@ -42,6 +51,9 @@ class UserModel {
       'address': address,
       'photoUrl': photoUrl,
       'createdAt': createdAt,
+
+      'areaStatus': areaStatusToString(areaStatus),
+      'areaId': areaId,
     };
   }
 }
