@@ -17,6 +17,11 @@ class UserService {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) return null;
 
-    return getUserProfile(user.uid);
+    final doc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+
+    return doc.data();
   }
 }

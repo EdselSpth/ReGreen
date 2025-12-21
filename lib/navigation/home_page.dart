@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:regreen/penarikan_area/penarikan_area_page.dart';
 import 'package:regreen/penarikan_keuntungan/penarikan_keuntungan_page.dart';
 import 'package:regreen/penarikan_keuntungan/status_penarikan_page.dart';
 import 'dart:convert';
-import 'package:regreen/penarikan_area.dart/penarikan_area_page.dart';
+import 'package:regreen/penarikan_area/penarikan_area_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
