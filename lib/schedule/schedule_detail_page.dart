@@ -58,7 +58,7 @@ class ScheduleDetailPage extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text("Penjemputan berhasil diajukan"),
-                  ),
+                  ), 
                 );
 
                 Navigator.pop(context);
