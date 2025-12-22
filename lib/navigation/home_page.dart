@@ -18,8 +18,6 @@ class _HomePageState extends State<HomePage> {
   String _userName = 'ReGreeners';
   String? _photoBase64;
 
-  int _saldo = 0;
-  bool _loadingSaldo = true;
   bool _hideSaldo = true;
 
   AreaStatus _areaStatus = AreaStatus.notRegistered;
@@ -32,7 +30,6 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _fetchUserName();
-    _fetchSaldo();
     _checkUserArea();
   }
 
@@ -59,33 +56,6 @@ class _HomePageState extends State<HomePage> {
         }
       } catch (e) {
         debugPrint("Error mengambil data user: $e");
-      }
-    }
-  }
-
-  Future<void> _fetchSaldo() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    try {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      if (userDoc.exists) {
-        final data = userDoc.data();
-        if (mounted) {
-          setState(() {
-            _saldo = (data?['balance'] ?? 0).toInt(); // ← FIX DI SINI
-            _loadingSaldo = false;
-          });
-        }
-      }
-    } catch (e) {
-      debugPrint('Error mengambil saldo: $e');
-      if (mounted) {
-        setState(() => _loadingSaldo = false);
       }
     }
   }
@@ -240,42 +210,66 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 const SizedBox(height: 8),
-                                _loadingSaldo
-                                    ? const Text(
+                                StreamBuilder<DocumentSnapshot>(
+                                  stream: FirebaseFirestore.instance
+                                      .collection('users')
+                                      .doc(
+                                        FirebaseAuth.instance.currentUser!.uid,
+                                      )
+                                      .snapshots(),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Text(
                                         'Memuat...',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18,
                                         ),
-                                      )
-                                    : Row(
-                                        children: [
-                                          Text(
+                                      );
+                                    }
+
+                                    if (!snapshot.hasData ||
+                                        !snapshot.data!.exists) {
+                                      return const Text('Rp 0');
+                                    }
+
+                                    final data =
+                                        snapshot.data!.data()
+                                            as Map<String, dynamic>;
+                                    final saldo = (data['balance'] ?? 0)
+                                        .toInt();
+
+                                    return Row(
+                                      children: [
+                                        Text(
+                                          _hideSaldo
+                                              ? 'Rp ••••••••'
+                                              : formatRupiah(saldo),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              _hideSaldo = !_hideSaldo;
+                                            });
+                                          },
+                                          child: Icon(
                                             _hideSaldo
-                                                ? 'Rp ••••••••'
-                                                : formatRupiah(_saldo),
-                                            style: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              fontSize: 18,
-                                            ),
+                                                ? Icons.visibility_off
+                                                : Icons.visibility,
+                                            size: 20,
+                                            color: Colors.black54,
                                           ),
-                                          const SizedBox(width: 8),
-                                          GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                _hideSaldo = !_hideSaldo;
-                                              });
-                                            },
-                                            child: Icon(
-                                              _hideSaldo
-                                                  ? Icons.visibility_off
-                                                  : Icons.visibility,
-                                              size: 20,
-                                              color: Colors.black54,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
                               ],
                             ),
 
