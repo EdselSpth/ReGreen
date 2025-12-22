@@ -24,7 +24,8 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
 
     // Logika Pagination: Ambil data tambahan saat scroll mendekati bawah
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
           !isLoading &&
           hasMore) {
         _fetchData();
@@ -55,7 +56,7 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
           if (refresh) {
             listStatus = newData;
             // Jika data baru lebih kecil dari limit, maka tidak ada lagi data selanjutnya
-            hasMore = newData.length == 10; 
+            hasMore = newData.length == 10;
             currentPage = 2;
           } else {
             if (newData.isEmpty) {
@@ -110,7 +111,12 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
                 children: const [
                   SizedBox(height: 250),
                   Center(child: Text("Belum ada riwayat penarikan")),
-                  Center(child: Text("Tarik ke bawah untuk memuat", style: TextStyle(fontSize: 12, color: Colors.grey))),
+                  Center(
+                    child: Text(
+                      "Tarik ke bawah untuk memuat",
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ),
                 ],
               )
             : ListView.builder(
@@ -123,8 +129,13 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
                   final statusStyle = _getStatusStyle(item['status']);
 
                   return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -135,20 +146,33 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
                             children: [
                               Text(
                                 "Rp ${item['nominal']}",
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: (statusStyle['color'] as Color).withOpacity(0.1),
+                                  color: (statusStyle['color'] as Color)
+                                      .withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(20),
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(statusStyle['icon'], size: 14, color: statusStyle['color']),
+                                    Icon(
+                                      statusStyle['icon'],
+                                      size: 14,
+                                      color: statusStyle['color'],
+                                    ),
                                     const SizedBox(width: 4),
                                     Text(
-                                      (item['status'] ?? 'PENDING').toString().toUpperCase(),
+                                      (item['status'] ?? 'PENDING')
+                                          .toString()
+                                          .toUpperCase(),
                                       style: TextStyle(
                                         color: statusStyle['color'],
                                         fontWeight: FontWeight.bold,
@@ -180,8 +204,14 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.black54, fontSize: 13)),
-          Text(value?.toString() ?? "-", style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.black54, fontSize: 13),
+          ),
+          Text(
+            value?.toString() ?? "-",
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          ),
         ],
       ),
     );
