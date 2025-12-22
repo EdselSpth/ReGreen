@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:regreen/edukasi/artikel_page.dart';
 import 'package:regreen/edukasi/video_page.dart';
+import 'package:regreen/navigation/main_screen.dart';
 
 class EdukasiScreen extends StatelessWidget {
   const EdukasiScreen({super.key});
@@ -19,7 +20,13 @@ class EdukasiScreen extends StatelessWidget {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const MainScreen()),
+              (route) => false,
+            );
+          },
         ),
       ),
       body: Container(
