@@ -8,7 +8,7 @@ class Penjemputan {
   final String status;
   final String time;
   final String wasteTypes;
-  final String? userId; // ⬅️ PENTING
+  final String? userId;
 
   Penjemputan({
     required this.id,
@@ -38,7 +38,7 @@ class Penjemputan {
       status: data['status'] ?? '',
       time: data['time'] ?? '',
       wasteTypes: data['wasteTypes'] ?? '',
-      userId: data['userId'], // ⬅️ NULL / UID
+      userId: data['userId'],
     );
   }
 }
