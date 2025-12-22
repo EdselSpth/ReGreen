@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:regreen/penarikan_keuntungan/status_penarikan_page.dart';
 import '../Service/api_service_keuntungan.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../service/user_service.dart';
 
 class PenarikanKeuntunganPage extends StatefulWidget {
@@ -14,7 +15,6 @@ class PenarikanKeuntunganPage extends StatefulWidget {
 
 class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
   final TextEditingController _nominalController = TextEditingController();
-
   int selectedNominal = 0;
 
   final List<int> nominalOptions = [
@@ -62,6 +62,8 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       backgroundColor: const Color(0xFF558B3E),
       body: Column(
@@ -102,18 +104,42 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
                 children: [
                   const SizedBox(height: 20),
 
-                  const Text(
-                    'Saldo',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Rp 199.900.000',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  // Bagian Saldo Real-time dari Firestore
+                  StreamBuilder<DocumentSnapshot>(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(user?.uid)
+                        .snapshots(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      }
+                      if (!snapshot.hasData || !snapshot.data!.exists) {
+                        return const Text("Gagal mengambil saldo");
+                      }
+
+                      var userData = snapshot.data!.data() as Map<String, dynamic>;
+                      int currentBalance = userData['balance'] ?? 0;
+
+                      return Column(
+                        children: [
+                          const Text(
+                            'Saldo',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black54,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            formatRupiah(currentBalance),
+                            style: const TextStyle(
+                                fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 30),
@@ -201,7 +227,6 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
                       ),
                       onPressed: getNominalValue() >= 20000
                           ? () async {
-                              final user = FirebaseAuth.instance.currentUser;
                               if (user == null) return;
 
                               final profile = await UserService.getUserProfile(
@@ -212,38 +237,53 @@ class _PenarikanKeuntunganPageState extends State<PenarikanKeuntunganPage> {
                                   profile['bankAccount'] == null) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text(
-                                      "Data rekening belum lengkap",
-                                    ),
+                                    content: Text("Data rekening belum lengkap"),
                                   ),
                                 );
                                 return;
                               }
 
-                              await ApiServiceKeuntungan.tarikKeuntungan(
+                              // Cek saldo dulu di sisi mobile sebelum kirim request
+                              int currentBalance = profile['balance'] ?? 0;
+                              if (currentBalance < getNominalValue()) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Saldo tidak mencukupi"),
+                                  ),
+                                );
+                                return;
+                              }
+
+                              bool success = await ApiServiceKeuntungan.tarikKeuntungan(
                                 firebaseUid: user.uid,
                                 namaPengguna: profile['username'],
                                 nominal: getNominalValue(),
-                                rekening:
-                                    profile['bankAccount']['accountNumber'],
+                                rekening: profile['bankAccount']['accountNumber'],
                                 metode: profile['bankAccount']['bankName'],
                               );
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Penarikan berhasil diajukan"),
-                                ),
-                              );
+                              if (success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Penarikan berhasil diajukan"),
+                                  ),
+                                );
 
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const StatusPenarikanPage(),
-                                ),
-                              );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const StatusPenarikanPage(),
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text("Gagal mengajukan penarikan"),
+                                  ),
+                                );
+                              }
                             }
                           : null,
-
                       child: const Text(
                         'Tarik',
                         style: TextStyle(
