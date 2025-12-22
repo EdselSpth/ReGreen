@@ -20,11 +20,11 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
   @override
   void initState() {
     super.initState();
-    _fetchData(); // Ambil data awal tanpa loading screen
-    
-    // Listener untuk tetap mengambil data halaman berikutnya saat scroll (Pagination)
+    _fetchData(refresh: true); // Ambil data pertama kali
+
+    // Logika Pagination: Ambil data tambahan saat scroll mendekati bawah
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9 &&
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
           !isLoading &&
           hasMore) {
         _fetchData();
@@ -33,19 +33,19 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
   }
 
   Future<void> _fetchData({bool refresh = false}) async {
-    if (user == null || isLoading) return;
+    if (user == null || (isLoading && !refresh)) return;
+
+    setState(() => isLoading = true);
 
     if (refresh) {
       currentPage = 1;
       hasMore = true;
     }
 
-    isLoading = true; // Set true secara internal tanpa memicu UI loading indicator
-
     try {
       final newData = await ApiServiceKeuntungan.getStatusUser(
         user!.uid,
-        page: refresh ? 1 : currentPage,
+        page: currentPage,
         limit: 10,
       );
 
@@ -54,6 +54,8 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
           isLoading = false;
           if (refresh) {
             listStatus = newData;
+            // Jika data baru lebih kecil dari limit, maka tidak ada lagi data selanjutnya
+            hasMore = newData.length == 10; 
             currentPage = 2;
           } else {
             if (newData.isEmpty) {
@@ -61,13 +63,15 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
             } else {
               listStatus.addAll(newData);
               currentPage++;
+              // Jika data yang baru saja diambil kurang dari 10, matikan hasMore
+              if (newData.length < 10) hasMore = false;
             }
           }
         });
       }
     } catch (e) {
       if (mounted) setState(() => isLoading = false);
-      print("Error: $e");
+      print("Error fetching status: $e");
     }
   }
 
@@ -77,54 +81,50 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
     super.dispose();
   }
 
+  // Fungsi helper untuk format status
+  Map<String, dynamic> _getStatusStyle(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'diterima':
+        return {'color': Colors.green, 'icon': Icons.check_circle};
+      case 'ditolak':
+        return {'color': Colors.red, 'icon': Icons.cancel};
+      default:
+        return {'color': Colors.orange, 'icon': Icons.pending_actions};
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Status Penarikan"),
+        title: const Text("Riwayat Penarikan"),
         backgroundColor: const Color(0xFF558B3E),
         elevation: 0,
       ),
-      // Pull-to-Refresh adalah satu-satunya indikator loading yang tersisa
       body: RefreshIndicator(
         onRefresh: () => _fetchData(refresh: true),
         color: const Color(0xFF558B3E),
-        child: listStatus.isEmpty
+        child: listStatus.isEmpty && !isLoading
             ? ListView(
                 physics: const AlwaysScrollableScrollPhysics(),
                 children: const [
-                  SizedBox(height: 200),
+                  SizedBox(height: 250),
                   Center(child: Text("Belum ada riwayat penarikan")),
-                  Center(child: Text("Tarik ke bawah untuk memuat", style: TextStyle(color: Colors.grey, fontSize: 12))),
+                  Center(child: Text("Tarik ke bawah untuk memuat", style: TextStyle(fontSize: 12, color: Colors.grey))),
                 ],
               )
             : ListView.builder(
                 controller: _scrollController,
                 physics: const AlwaysScrollableScrollPhysics(),
-                itemCount: listStatus.length, // Tidak ada tambahan item untuk loading indicator
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                itemCount: listStatus.length,
                 itemBuilder: (context, index) {
                   final item = listStatus[index];
-                  
-                  Color statusColor;
-                  IconData statusIcon;
-                  switch (item['status'].toString().toLowerCase()) {
-                    case 'diterima':
-                      statusColor = Colors.green;
-                      statusIcon = Icons.check_circle_outline;
-                      break;
-                    case 'ditolak':
-                      statusColor = Colors.red;
-                      statusIcon = Icons.highlight_off;
-                      break;
-                    default:
-                      statusColor = Colors.orange;
-                      statusIcon = Icons.access_time;
-                  }
+                  final statusStyle = _getStatusStyle(item['status']);
 
                   return Card(
                     margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    elevation: 2,
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -137,22 +137,33 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
                                 "Rp ${item['nominal']}",
                                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                               ),
-                              Row(
-                                children: [
-                                  Icon(statusIcon, color: statusColor, size: 16),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    item['status'].toString().toUpperCase(),
-                                    style: TextStyle(color: statusColor, fontWeight: FontWeight.bold, fontSize: 12),
-                                  ),
-                                ],
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: (statusStyle['color'] as Color).withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(statusStyle['icon'], size: 14, color: statusStyle['color']),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      (item['status'] ?? 'PENDING').toString().toUpperCase(),
+                                      style: TextStyle(
+                                        color: statusStyle['color'],
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 11,
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                           const Divider(height: 24),
-                          _buildDetailItem("Penerima", item['nama_pengguna']),
-                          _buildDetailItem("Metode", item['metode']),
-                          _buildDetailItem("Rekening", item['rekening']),
+                          _buildRowInfo("Metode", item['metode']),
+                          _buildRowInfo("Rekening", item['rekening']),
+                          _buildRowInfo("Nama", item['nama_pengguna']),
                         ],
                       ),
                     ),
@@ -163,17 +174,14 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
     );
   }
 
-  Widget _buildDetailItem(String label, dynamic value) {
+  Widget _buildRowInfo(String label, dynamic value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(color: Colors.black54, fontSize: 13)),
-          Text(
-            value?.toString() ?? "-",
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.black87),
-          ),
+          Text(value?.toString() ?? "-", style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
         ],
       ),
     );

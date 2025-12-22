@@ -2,8 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiServiceKeuntungan {
+  // Gunakan 10.0.2.2 untuk emulator Android, atau IP asli PC jika pakai HP fisik
   static const String baseUrl = "http://10.0.2.2:3000/api/keuntungan";
 
+  /// Fungsi untuk mengajukan penarikan baru
   static Future<bool> tarikKeuntungan({
     required String firebaseUid,
     required String namaPengguna,
@@ -23,6 +25,7 @@ class ApiServiceKeuntungan {
           "metode": metode,
         }),
       );
+
       return response.statusCode == 201;
     } catch (e) {
       print("Error POST Keuntungan: $e");
@@ -30,25 +33,35 @@ class ApiServiceKeuntungan {
     }
   }
 
-  // PASTIKAN BAGIAN INI ADA PARAMETER DALAM KURUNG KURAWAL {}
+  /// Fungsi untuk mengambil riwayat status dengan Pagination
   static Future<List<dynamic>> getStatusUser(String firebaseUid, {int page = 1, int limit = 10}) async {
     try {
-      final response = await http.get(
-        Uri.parse("$baseUrl/user/$firebaseUid?page=$page&limit=$limit"),
-      );
+      final url = "$baseUrl/user/$firebaseUid?page=$page&limit=$limit";
+      print("DEBUG: Request URL -> $url");
+
+      final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        
+        // Debugging untuk melihat struktur JSON asli dari backend
+        print("DEBUG: Response Body -> ${response.body}");
+
+        // Mengambil array dari dalam properti 'data'
         if (jsonResponse.containsKey('data') && jsonResponse['data'] != null) {
-          return jsonResponse['data'] as List<dynamic>;
+          List<dynamic> data = jsonResponse['data'] as List<dynamic>;
+          print("DEBUG: Berhasil mengambil ${data.length} data untuk page $page");
+          return data;
         }
+        
+        print("DEBUG: Key 'data' tidak ditemukan atau null");
         return [];
       } else {
-        print("Server error: ${response.statusCode}");
+        print("DEBUG: Server error: ${response.statusCode}");
         return [];
       }
     } catch (e) {
-      print("Network error: $e");
+      print("DEBUG: Network error di ApiService: $e");
       return [];
     }
   }
