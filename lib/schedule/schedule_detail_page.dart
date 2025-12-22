@@ -1,73 +1,135 @@
 import 'package:flutter/material.dart';
-import '../service/schedule_service.dart';
-import '../Model/area_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:regreen/Model/penjemputan_model.dart';
+import 'package:regreen/Service/schedule_service.dart';
 
 class ScheduleDetailPage extends StatelessWidget {
-  final String courierName;
-  final String scheduleDate;
-  final String scheduleTime;
-  final String wasteTypes;
-  final String courierImage;
-  final AreaModel area;
+  final Penjemputan penjemputan;
 
-  const ScheduleDetailPage({
-    super.key,
-    required this.courierName,
-    required this.scheduleDate,
-    required this.scheduleTime,
-    required this.wasteTypes,
-    required this.courierImage,
-    required this.area,
-  });
+  const ScheduleDetailPage({super.key, required this.penjemputan});
 
   @override
   Widget build(BuildContext context) {
-    final ScheduleService service = ScheduleService();
-    final address = service.buildAddress(area);
+    final userId = FirebaseAuth.instance.currentUser!.uid;
+    final service = ScheduleService();
+
+    final bolehDaftar =
+        penjemputan.status == 'tersedia' || penjemputan.status == 'selesai';
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Detail Jadwal")),
-      body: Padding(
+      backgroundColor: const Color(0xFFE8EDDE),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF558B3E),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          'Detail Penjemputan',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(courierImage, height: 150),
-            const SizedBox(height: 12),
+            _infoCard(),
+            const SizedBox(height: 24),
 
-            Text("Kurir : $courierName"),
-            Text("Tanggal : $scheduleDate"),
-            Text("Waktu : $scheduleTime"),
-            Text("Jenis Sampah : $wasteTypes"),
+            if (bolehDaftar)
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF558B3E),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  onPressed: () async {
+                    await service.daftarPenjemputan(
+                      penjemputanId: penjemputan.id,
+                      userId: userId,
+                    );
 
-            const SizedBox(height: 12),
-            Text("Alamat:\n$address"),
+                    Navigator.pop(context);
 
-            const Spacer(),
-
-            ElevatedButton(
-              onPressed: () async {
-                await service.submitPenjemputan(
-                  courierName: courierName,
-                  scheduleDate: scheduleDate,
-                  scheduleTime: scheduleTime,
-                  wasteTypes: wasteTypes,
-                  area: area, // ✅ SEKARANG VALID
-                );
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Penjemputan berhasil diajukan"),
-                  ), 
-                );
-
-                Navigator.pop(context);
-              },
-              child: const Text("Ajukan Penjemputan"),
-            ),
-            
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Berhasil mendaftar penjemputan'),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Daftar Penjemputan',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _infoCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDDE7CC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.6), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          _row(Icons.person, 'Kurir', penjemputan.courierName),
+          _row(Icons.location_on, 'Alamat', penjemputan.alamat),
+          _row(
+            Icons.calendar_today,
+            'Tanggal',
+            penjemputan.tanggal.toLocal().toString().split(' ')[0],
+          ),
+          _row(Icons.access_time, 'Waktu', penjemputan.time),
+          _row(Icons.delete, 'Jenis Sampah', penjemputan.wasteTypes),
+          _row(Icons.info, 'Status', penjemputan.status.toUpperCase()),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: const Color(0xFF558B3E)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              '$label: $value',
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black54,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

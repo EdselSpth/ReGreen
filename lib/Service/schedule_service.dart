@@ -1,54 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../Model/area_model.dart';
+import 'package:regreen/Model/penjemputan_model.dart';
 
 class ScheduleService {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final _db = FirebaseFirestore.instance;
 
-  String buildAddress(AreaModel area) {
-    return "${area.kelurahan}, ${area.kecamatan}, "
-        "${area.kota}, ${area.provinsi}";
+  Stream<List<Penjemputan>> getPenjemputanStream() {
+    return _db
+        .collection('penjemputan')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => Penjemputan.fromMap(doc.data(), doc.id))
+          .toList();
+    });
   }
 
-  Future<void> submitPenjemputan({
-    required String courierName,
-    required String scheduleDate,
-    required String scheduleTime,
-    required String wasteTypes,
-    required AreaModel area,
+  /// USER DAFTAR
+  Future<void> daftarPenjemputan({
+    required String penjemputanId,
+    required String userId,
   }) async {
-    final jadwalQuery = await _firestore
-        .collection('jadwal')
-        .where('courierName', isEqualTo: courierName)
-        .where('date', isEqualTo: scheduleDate)
-        .where('time', isEqualTo: scheduleTime)
-        .limit(1)
-        .get();
+    final ref = _db.collection('penjemputan').doc(penjemputanId);
 
-    if (jadwalQuery.docs.isEmpty) {
-      throw Exception("Jadwal tidak ditemukan");
-    }
-
-    final jadwalDoc = jadwalQuery.docs.first;
-    final status = jadwalDoc['status'];
-
-    if (status != 'tersedia') {
-      throw Exception("Jadwal sudah diambil");
-    }
-
-    // Simpan pengajuan
-    await _firestore.collection('penjemputan').add({
-      'courierName': courierName,
-      'date': scheduleDate,
-      'time': scheduleTime,
-      'wasteTypes': wasteTypes,
-      'alamat': buildAddress(area),
+    await ref.update({
+      'userId': userId,
       'status': 'menunggu',
-      'createdAt': FieldValue.serverTimestamp(),
-    });
-
-    // Update status jadwal
-    await jadwalDoc.reference.update({
-      'status': 'diambil',
     });
   }
 }
