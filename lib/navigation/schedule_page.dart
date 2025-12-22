@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:regreen/Model/penjemputan_model.dart';
-import 'package:regreen/Service/schedule_service.dart';
-import 'package:regreen/schedule/schedule_detail_page.dart';
+import '../Model/penjemputan_model.dart';
+import '../service/schedule_service.dart';
+import '../schedule/schedule_detail_page.dart';
 
 class SchedulePage extends StatelessWidget {
   const SchedulePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final service = ScheduleService();
+    final ScheduleService service = ScheduleService();
 
     return Scaffold(
       backgroundColor: const Color(0xFFE8EDDE),
@@ -39,7 +39,10 @@ class SchedulePage extends StatelessWidget {
             return const Center(
               child: Text(
                 'Belum ada jadwal penjemputan',
-                style: TextStyle(color: Colors.black54),
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             );
           }
@@ -60,81 +63,124 @@ class SchedulePage extends StatelessWidget {
                     ),
                   );
                 },
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: 14),
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFDDE7CC),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: Colors.white.withOpacity(0.6),
-                      width: 1,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.08),
-                        blurRadius: 14,
-                        offset: const Offset(0, 8),
-                      ),
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 4,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF558B3E).withOpacity(0.15),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.local_shipping,
-                          color: Color(0xFF558B3E),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              item.courierName,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              item.alamat,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.black54,
-                                fontSize: 13,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              '📅 ${item.tanggal.toLocal().toString().split(" ")[0]}',
-                              style: const TextStyle(fontSize: 13),
-                            ),
-                            Text("⏰ ${item.time}"),
-                          ],
-                        ),
-                      ),
-                      _statusChip(item.status),
-                    ],
-                  ),
-                ),
+                child: _ScheduleCard(item: item),
               );
             },
           );
         },
+      ),
+    );
+  }
+}
+
+class _ScheduleCard extends StatelessWidget {
+  final Penjemputan item;
+
+  const _ScheduleCard({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFDDE7CC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.6)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 14,
+            offset: const Offset(0, 8),
+          ),
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF558B3E).withOpacity(0.15),
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.local_shipping, color: Color(0xFF558B3E)),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.courierName,
+                  style: const TextStyle(
+                    fontSize: 18, // lebih besar
+                    fontWeight: FontWeight.bold, // bold
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  item.alamat,
+                  style: const TextStyle(
+                    fontSize: 16, // lebih besar
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 12,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 16,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.tanggal.toLocal().toString().split(" ")[0],
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.access_time,
+                          size: 16,
+                          color: Colors.black54,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.time,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          _statusChip(item.status),
+        ],
       ),
     );
   }
@@ -157,15 +203,15 @@ class SchedulePage extends StatelessWidget {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.15),
+        color: color.withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         status.toUpperCase(),
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 14, // lebih besar
           color: color,
           fontWeight: FontWeight.bold,
         ),
