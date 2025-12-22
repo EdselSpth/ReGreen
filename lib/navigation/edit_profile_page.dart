@@ -191,13 +191,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     return Scaffold(
-      // 1. Scaffold tetap menggunakan kGreenDark agar area Status Bar di atas tetap hijau
       backgroundColor: kGreenDark,
       body: Column(
         children: [
-          // 2. Gunakan SafeArea HANYA untuk bagian atas (Header)
           SafeArea(
-            bottom: false, // Matikan safe area bawah di sini
+            bottom: false,
             child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: Row(
@@ -231,18 +229,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
           ),
 
-          // 3. CONTENT SECTION
           Expanded(
             child: Container(
               width: double.infinity,
               decoration: const BoxDecoration(
-                color: kCream, // Warna krem dimulai dari sini
+                color: kCream,
                 borderRadius: BorderRadius.only(
                   topLeft: Radius.circular(40),
                   topRight: Radius.circular(40),
                 ),
               ),
-              // Tambahkan Column di dalam Container krem untuk menampung ScrollView dan SafeArea bawah
               child: Column(
                 children: [
                   Expanded(
@@ -262,7 +258,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // --- Bagian Stack Profil & Form ---
                                   Stack(
                                     clipBehavior: Clip.none,
                                     children: [
@@ -469,7 +464,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         filled: true,
         fillColor: isReadOnly
             ? Colors.grey.shade300
-            : Colors.white.withOpacity(0.6),
+            : Colors.white.withValues(alpha: 0.6),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,

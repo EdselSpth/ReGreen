@@ -5,7 +5,6 @@ import 'package:regreen/navigation/edit_profile_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:regreen/Service/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:regreen/navigation/main_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -150,16 +149,6 @@ class _ProfilePageState extends State<ProfilePage> {
             color: Colors.white,
             fontSize: 20,
           ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const MainScreen()),
-              (route) => false,
-            );
-          },
         ),
       ),
 
