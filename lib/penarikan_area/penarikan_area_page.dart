@@ -40,7 +40,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
       setState(() => isLoading = false);
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _showAddressRequiredDialog();
+        _showAddressRequiredDialog();
       });
       return;
     }
@@ -133,11 +133,11 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
                   _statusInfo(status),
                   const SizedBox(height: 12),
 
-                  _inputField('Nama Jalan', jalanCtrl, isEditable),
-                  _inputField('Kelurahan', kelurahanCtrl, isEditable),
-                  _inputField('Kecamatan', kecamatanCtrl, isEditable),
-                  _inputField('Kota', kotaCtrl, isEditable),
-                  _inputField('Provinsi', provinsiCtrl, isEditable),
+                  _inputField('Nama Jalan', jalanCtrl, false),
+                  _inputField('Kelurahan', kelurahanCtrl, false),
+                  _inputField('Kecamatan', kecamatanCtrl, false),
+                  _inputField('Kota', kotaCtrl, false),
+                  _inputField('Provinsi', provinsiCtrl, false),
 
                   const SizedBox(height: 24),
 
@@ -149,6 +149,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
                         onPressed: _submitArea,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF5C8E3E),
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -169,32 +170,30 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
-        title: const Text('Alamat Belum Lengkap'),
-        content: const Text(
-          'Silakan lengkapi alamat di halaman profil terlebih dahulu '
-          'sebelum mendaftarkan area.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context); // kembali ke halaman sebelumnya
-            },
-            child: const Text('Nanti'),
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Alamat Belum Lengkap'),
+          content: const Text(
+            'Untuk mendaftarkan area, silakan lengkapi alamat di profil terlebih dahulu.',
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const EditProfilePage()),
-              );
-            },
-            child: const Text('Ke Profil'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // tutup dialog
+                Navigator.pop(context); // balik ke halaman sebelumnya
+              },
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.pushNamed(context, '/edit-profile');
+              },
+              child: const Text('Isi Alamat'),
+            ),
+          ],
+        );
+      },
     );
   }
 
