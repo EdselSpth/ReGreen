@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:regreen/navigation/edit_profile_page.dart';
 
 import '../Model/area_model.dart';
 import '../Model/area_status.dart';
@@ -17,13 +18,13 @@ class PendaftaranAreaPage extends StatefulWidget {
 class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
   final _formKey = GlobalKey<FormState>();
 
+  final jalanCtrl = TextEditingController();
   final provinsiCtrl = TextEditingController();
   final kotaCtrl = TextEditingController();
   final kecamatanCtrl = TextEditingController();
   final kelurahanCtrl = TextEditingController();
 
   bool isLoading = true;
-  bool allowManualInput = false;
 
   @override
   void initState() {
@@ -36,22 +37,21 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     final address = profile?['address'];
 
     if (address == null) {
-      setState(() {
-        allowManualInput = true;
-        isLoading = false;
+      setState(() => isLoading = false);
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showAddressRequiredDialog();
       });
       return;
     }
 
-    provinsiCtrl.text = address['provinsi'] ?? '';
-    kotaCtrl.text = address['kota'] ?? '';
-    kecamatanCtrl.text = address['kecamatan'] ?? '';
+    jalanCtrl.text = address['jalan'] ?? '';
     kelurahanCtrl.text = address['kelurahan'] ?? '';
+    kecamatanCtrl.text = address['kecamatan'] ?? '';
+    kotaCtrl.text = address['kota'] ?? '';
+    provinsiCtrl.text = address['provinsi'] ?? '';
 
-    setState(() {
-      allowManualInput = false;
-      isLoading = false;
-    });
+    setState(() => isLoading = false);
   }
 
   Future<void> _submitArea() async {
@@ -62,16 +62,16 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
     final area = AreaModel(
-      provinsi: provinsiCtrl.text,
-      kota: kotaCtrl.text,
-      kecamatan: kecamatanCtrl.text,
+      jalan: jalanCtrl.text,
       kelurahan: kelurahanCtrl.text,
+      kecamatan: kecamatanCtrl.text,
+      kota: kotaCtrl.text,
+      provinsi: provinsiCtrl.text,
     );
 
     try {
       final areaId = await AreaService.createArea(area);
 
-      // 2️⃣ set status user = pending
       await FirebaseFirestore.instance.collection('users').doc(uid).update({
         'areaStatus': 'pending',
         'areaId': areaId,
@@ -83,8 +83,9 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
             content: Text('Area berhasil didaftarkan, menunggu verifikasi'),
           ),
         );
+        Navigator.pop(context, true);
       }
-    } catch (e) {
+    } catch (_) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Gagal mendaftarkan area')));
@@ -132,10 +133,11 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
                   _statusInfo(status),
                   const SizedBox(height: 12),
 
-                  _inputField('Provinsi', provinsiCtrl, isEditable),
-                  _inputField('Kota', kotaCtrl, isEditable),
-                  _inputField('Kecamatan', kecamatanCtrl, isEditable),
+                  _inputField('Nama Jalan', jalanCtrl, isEditable),
                   _inputField('Kelurahan', kelurahanCtrl, isEditable),
+                  _inputField('Kecamatan', kecamatanCtrl, isEditable),
+                  _inputField('Kota', kotaCtrl, isEditable),
+                  _inputField('Provinsi', provinsiCtrl, isEditable),
 
                   const SizedBox(height: 24),
 
@@ -160,6 +162,39 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
           ),
         );
       },
+    );
+  }
+
+  void _showAddressRequiredDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        title: const Text('Alamat Belum Lengkap'),
+        content: const Text(
+          'Silakan lengkapi alamat di halaman profil terlebih dahulu '
+          'sebelum mendaftarkan area.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.pop(context); // kembali ke halaman sebelumnya
+            },
+            child: const Text('Nanti'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditProfilePage()),
+              );
+            },
+            child: const Text('Ke Profil'),
+          ),
+        ],
+      ),
     );
   }
 
