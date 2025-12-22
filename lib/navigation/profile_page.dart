@@ -6,9 +6,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:regreen/Service/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:regreen/navigation/main_screen.dart';
-// Pastikan import home_page.dart ada jika memang dibutuhkan di tempat lain,
-// tapi di file ini sepertinya tidak dipakai langsung.
-// import 'home_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -141,8 +138,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
-      backgroundColor: ProfilePage.kGreenDark, // Warna Hijau Background
-      // --- PERUBAHAN UTAMA DI SINI (Menggunakan AppBar) ---
+      backgroundColor: ProfilePage.kGreenDark,
       appBar: AppBar(
         backgroundColor: ProfilePage.kGreenDark,
         elevation: 0,
