@@ -1,8 +1,4 @@
-enum AreaStatus {
-  notRegistered,
-  pending,
-  approved,
-}
+enum AreaStatus { notRegistered, pending, approved }
 
 AreaStatus areaStatusFromString(String? status) {
   switch (status) {
@@ -21,7 +17,7 @@ String areaStatusToString(AreaStatus status) {
       return 'pending';
     case AreaStatus.approved:
       return 'approved';
-    default:
-      return 'not_registered';
+    case AreaStatus.notRegistered:
+      return 'notRegistered';
   }
 }

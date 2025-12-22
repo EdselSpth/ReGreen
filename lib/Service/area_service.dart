@@ -1,32 +1,15 @@
-import 'dart:convert';
-import 'package:http/http.dart' as http;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../Model/area_model.dart';
 
 class AreaService {
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+  static final _areaRef = FirebaseFirestore.instance.collection('areas');
 
-  static Future<void> createArea(AreaModel area) async {
-    final response = await http.post(
-      Uri.parse('$baseUrl/area'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode(area.toJson()),
-    );
+  static Future<String> createArea(AreaModel area) async {
+    final doc = await _areaRef.add({
+      ...area.toJson(),
+      'createdAt': FieldValue.serverTimestamp(),
+    });
 
-    if (response.statusCode != 201 && response.statusCode != 200) {
-      throw Exception('Gagal mendaftarkan area');
-    }
-  }
-
-  static Future<bool> isAreaRegistered(String kecamatan) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/area?kecamatan=$kecamatan'),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return data is List && data.isNotEmpty;
-    }
-
-    return false;
+    return doc.id;
   }
 }

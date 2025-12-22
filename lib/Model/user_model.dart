@@ -36,7 +36,6 @@ class UserModel {
       createdAt: map['createdAt'] != null
           ? (map['createdAt'] as Timestamp).toDate()
           : null,
-
       areaStatus: areaStatusFromString(map['areaStatus']),
       areaId: map['areaId'],
     );
@@ -51,7 +50,6 @@ class UserModel {
       'address': address,
       'photoUrl': photoUrl,
       'createdAt': createdAt,
-
       'areaStatus': areaStatusToString(areaStatus),
       'areaId': areaId,
     };

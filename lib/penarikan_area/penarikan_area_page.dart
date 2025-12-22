@@ -69,12 +69,12 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     );
 
     try {
-      // ⛔ AreaService TIDAK DIUBAH
-      await AreaService.createArea(area);
+      final areaId = await AreaService.createArea(area);
 
-      // 🔥 Update status user ke Firestore
+      // 2️⃣ set status user = pending
       await FirebaseFirestore.instance.collection('users').doc(uid).update({
         'areaStatus': 'pending',
+        'areaId': areaId,
       });
 
       if (mounted) {
@@ -83,10 +83,8 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
             content: Text('Area berhasil didaftarkan, menunggu verifikasi'),
           ),
         );
-
-        Navigator.pop(context, true); // 🔥 INI PENTING
       }
-    } catch (_) {
+    } catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Gagal mendaftarkan area')));
@@ -115,10 +113,9 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
           );
         }
 
-        final userData = snapshot.data!.data() as Map<String, dynamic>;
-        final areaStatus = areaStatusFromString(userData['areaStatus']);
-
-        final bool isEditable = areaStatus == AreaStatus.notRegistered;
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final status = areaStatusFromString(data['areaStatus']);
+        final isEditable = status == AreaStatus.notRegistered;
 
         return Scaffold(
           appBar: AppBar(
@@ -132,7 +129,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _statusInfo(areaStatus),
+                  _statusInfo(status),
                   const SizedBox(height: 12),
 
                   _inputField('Provinsi', provinsiCtrl, isEditable),
