@@ -1,8 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:regreen/Model/penjemputan_model.dart';
+import '../Model/penjemputan_model.dart';
 
 class ScheduleService {
-  final _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Stream<List<Penjemputan>> getPenjemputanStream() {
     return _db
@@ -16,7 +16,7 @@ class ScheduleService {
     });
   }
 
-  /// USER DAFTAR
+  /// USER DAFTAR PENJEMPUTAN
   Future<void> daftarPenjemputan({
     required String penjemputanId,
     required String userId,

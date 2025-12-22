@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:regreen/Model/penjemputan_model.dart';
-import 'package:regreen/Service/schedule_service.dart';
+import '../Model/penjemputan_model.dart';
+import '../service/schedule_service.dart';
 
 class ScheduleDetailPage extends StatelessWidget {
   final Penjemputan penjemputan;
@@ -10,40 +10,55 @@ class ScheduleDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId = FirebaseAuth.instance.currentUser!.uid;
-    final service = ScheduleService();
+    final String userId = FirebaseAuth.instance.currentUser!.uid;
+    final ScheduleService service = ScheduleService();
 
-    final bolehDaftar =
+    final bool bolehDaftar =
         penjemputan.status == 'tersedia' || penjemputan.status == 'selesai';
+
+    Color statusColor;
+    switch (penjemputan.status.toLowerCase()) {
+      case 'tersedia':
+        statusColor = Colors.green;
+        break;
+      case 'selesai':
+        statusColor = Colors.blue;
+        break;
+      case 'dibatalkan':
+        statusColor = Colors.red;
+        break;
+      default:
+        statusColor = Colors.grey;
+    }
 
     return Scaffold(
       backgroundColor: const Color(0xFFE8EDDE),
       appBar: AppBar(
         backgroundColor: const Color(0xFF558B3E),
         foregroundColor: Colors.white,
-        elevation: 0,
         title: const Text(
           'Detail Penjemputan',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _infoCard(),
-            const SizedBox(height: 24),
-
+            _InfoCard(penjemputan: penjemputan, statusColor: statusColor),
+            const SizedBox(height: 32),
             if (bolehDaftar)
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF558B3E),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
+                    elevation: 4,
                   ),
                   onPressed: () async {
                     await service.daftarPenjemputan(
@@ -74,63 +89,88 @@ class ScheduleDetailPage extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _infoCard() {
+class _InfoCard extends StatelessWidget {
+  final Penjemputan penjemputan;
+  final Color statusColor;
+
+  const _InfoCard({required this.penjemputan, required this.statusColor});
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: const Color(0xFFDDE7CC),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.6), width: 1),
+        border: Border.all(color: Colors.white.withOpacity(0.6)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.08),
             blurRadius: 14,
             offset: const Offset(0, 8),
           ),
-          BoxShadow(
-            color: Colors.black.withOpacity(0.04),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _row(Icons.person, 'Kurir', penjemputan.courierName),
+          const SizedBox(height: 8),
           _row(Icons.location_on, 'Alamat', penjemputan.alamat),
+          const SizedBox(height: 8),
           _row(
             Icons.calendar_today,
             'Tanggal',
             penjemputan.tanggal.toLocal().toString().split(' ')[0],
           ),
+          const SizedBox(height: 8),
           _row(Icons.access_time, 'Waktu', penjemputan.time),
+          const SizedBox(height: 8),
           _row(Icons.delete, 'Jenis Sampah', penjemputan.wasteTypes),
-          _row(Icons.info, 'Status', penjemputan.status.toUpperCase()),
+          const SizedBox(height: 16),
+          // Status dengan badge
+          Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: statusColor.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                penjemputan.status.toUpperCase(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: statusColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
   Widget _row(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: const Color(0xFF558B3E)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              '$label: $value',
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.bold,
-                color: Colors.black54,
-              ),
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 22, color: const Color(0xFF558B3E)),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            '$label: $value',
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
