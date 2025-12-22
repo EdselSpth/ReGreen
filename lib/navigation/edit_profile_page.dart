@@ -82,21 +82,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
               kelurahanaController.text = addr['kelurahan'] ?? '';
               kotaController.text = addr['kota'] ?? '';
               provinsiController.text = addr['provinsi'] ?? '';
-            } else {
-              jalanController.text = '';
-              kecamatanController.text = '';
-              kelurahanaController.text = '';
-              kotaController.text = '';
-              provinsiController.text = '';
             }
 
             if (data['bankAccount'] != null && data['bankAccount'] is Map) {
               Map<String, dynamic> bankAcc = data['bankAccount'];
               nomerRekeningController.text = bankAcc['accountNumber'] ?? '';
               namaBankController.text = bankAcc['bankName'] ?? '';
-            } else {
-              nomerRekeningController.text = '';
-              namaBankController.text = '';
             }
           });
         }
@@ -121,9 +112,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Gagal mengambil gambar dari galeri')),
-      );
     }
   }
 
@@ -141,7 +129,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     if (user != null) {
       try {
         String? base64Image;
-
         if (_imageFile != null) {
           List<int> imageBytes = await _imageFile!.readAsBytes();
           base64Image = base64Encode(imageBytes);
@@ -150,7 +137,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         Map<String, dynamic> dataToUpdate = {
           'username': nameController.text,
           'phoneNumber': phoneController.text,
-
           'address': {
             'jalan': jalanController.text,
             'kecamatan': kecamatanController.text,
@@ -158,7 +144,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             'kota': kotaController.text,
             'provinsi': provinsiController.text,
           },
-
           'bankAccount': {
             'accountNumber': nomerRekeningController.text,
             'bankName': namaBankController.text,
@@ -174,16 +159,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             .doc(user.uid)
             .update(dataToUpdate);
 
-        if (passwordController.text.isNotEmpty) {
-          if (passwordController.text.length < 6) {
-            throw FirebaseAuthException(
-              code: 'weak-password',
-              message: 'Password minimal 6 karakter',
-            );
-          }
-          await user.updatePassword(passwordController.text);
-        }
-
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -194,26 +169,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
           Navigator.pop(context);
         }
       } catch (e) {
-        debugPrint("Error saving profile: $e");
-        String message = 'Gagal menyimpan perubahan.';
-        if (e.toString().contains('requires-recent-login')) {
-          message = 'Untuk ganti password, mohon logout dan login kembali.';
-        }
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message), backgroundColor: Colors.red),
-          );
-        }
+        debugPrint("Error: $e");
       }
     }
-
     if (mounted) setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     ImageProvider backgroundImage;
-
     if (_imageFile != null) {
       backgroundImage = FileImage(_imageFile!);
     } else if (_currentPhotoBase64 != null && _currentPhotoBase64!.isNotEmpty) {
@@ -227,11 +191,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     return Scaffold(
+      // 1. Scaffold tetap menggunakan kGreenDark agar area Status Bar di atas tetap hijau
       backgroundColor: kGreenDark,
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
+      body: Column(
+        children: [
+          // 2. Gunakan SafeArea HANYA untuk bagian atas (Header)
+          SafeArea(
+            bottom: false, // Matikan safe area bawah di sini
+            child: Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
               child: Row(
                 children: [
@@ -262,167 +229,223 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ],
               ),
             ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  color: kCream,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(40),
-                    topRight: Radius.circular(40),
-                  ),
+          ),
+
+          // 3. CONTENT SECTION
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: kCream, // Warna krem dimulai dari sini
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(40),
+                  topRight: Radius.circular(40),
                 ),
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 26,
-                    vertical: 24,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              color: kGreenLight,
-                              borderRadius: BorderRadius.circular(20),
+              ),
+              // Tambahkan Column di dalam Container krem untuk menampung ScrollView dan SafeArea bawah
+              child: Column(
+                children: [
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        return SingleChildScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: constraints.maxHeight,
                             ),
-                            padding: const EdgeInsets.fromLTRB(16, 60, 16, 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const SizedBox(height: 16),
-                                _fieldLabel('Nama'),
-                                _filledField(controller: nameController),
-                                const SizedBox(height: 12),
-                                _fieldLabel('Email'),
-                                _filledField(
-                                  controller: emailController,
-                                  keyboardType: TextInputType.emailAddress,
-                                  isReadOnly: true,
-                                ),
-                                const SizedBox(height: 12),
-                                _fieldLabel('No Telepon'),
-                                _filledField(
-                                  controller: phoneController,
-                                  keyboardType: TextInputType.phone,
-                                ),
-                                const SizedBox(height: 16),
-                                _fieldLabel('Alamat Lengkap'),
-                                const SizedBox(height: 6),
-                                _fieldLabel('Nama Jalan'),
-                                _filledField(controller: jalanController),
-                                const SizedBox(height: 12),
-                                _fieldLabel('Kelurahan'),
-                                _filledField(controller: kelurahanaController),
-                                const SizedBox(height: 12),
-                                _fieldLabel('Kecamatan'),
-                                _filledField(controller: kecamatanController),
-                                const SizedBox(height: 12),
-                                _fieldLabel('Kota'),
-                                _filledField(controller: kotaController),
-                                const SizedBox(height: 12),
-                                _fieldLabel('Provinsi'),
-                                _filledField(controller: provinsiController),
-                                const SizedBox(height: 12),
-                                _fieldLabel('Nomer Rekening'),
-                                _filledField(
-                                  controller: nomerRekeningController,
-                                  keyboardType: TextInputType.number,
-                                ),
-                                const SizedBox(height: 12),
-                                _fieldLabel('Nama Bank'),
-                                _filledField(controller: namaBankController),
-                                const SizedBox(height: 24),
-                                SizedBox(
-                                  width: double.infinity,
-                                  child: ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: kGreenDark,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        vertical: 14,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                    ),
-                                    onPressed: _isLoading ? null : _saveProfile,
-                                    child: _isLoading
-                                        ? const SizedBox(
-                                            height: 20,
-                                            width: 20,
-                                            child: CircularProgressIndicator(
-                                              color: Colors.white,
-                                              strokeWidth: 2,
-                                            ),
-                                          )
-                                        : const Text(
-                                            'Simpan Perubahan',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Positioned(
-                            top: -10,
-                            left: 0,
-                            right: 0,
-                            child: Center(
-                              child: Stack(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 26,
+                                vertical: 24,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  CircleAvatar(
-                                    radius: 42,
-                                    backgroundColor: kCream,
-                                    child: CircleAvatar(
-                                      radius: 38,
-                                      backgroundColor: Colors.grey.shade200,
-                                      backgroundImage: backgroundImage,
-                                    ),
-                                  ),
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: InkWell(
-                                      onTap: _pickImage,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(6),
+                                  // --- Bagian Stack Profil & Form ---
+                                  Stack(
+                                    clipBehavior: Clip.none,
+                                    children: [
+                                      Container(
+                                        width: double.infinity,
                                         decoration: BoxDecoration(
-                                          color: kGreenDark,
-                                          shape: BoxShape.circle,
-                                          border: Border.all(
-                                            color: Colors.white,
-                                            width: 2,
+                                          color: kGreenLight,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
                                           ),
                                         ),
-                                        child: const Icon(
-                                          Icons.camera_alt,
-                                          color: Colors.white,
-                                          size: 18,
+                                        padding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          60,
+                                          16,
+                                          16,
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            const SizedBox(height: 16),
+                                            _fieldLabel('Nama'),
+                                            _filledField(
+                                              controller: nameController,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _fieldLabel('Email'),
+                                            _filledField(
+                                              controller: emailController,
+                                              isReadOnly: true,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _fieldLabel('No Telepon'),
+                                            _filledField(
+                                              controller: phoneController,
+                                              keyboardType: TextInputType.phone,
+                                            ),
+                                            const SizedBox(height: 16),
+                                            _fieldLabel('Alamat Lengkap'),
+                                            const SizedBox(height: 6),
+                                            _fieldLabel('Nama Jalan'),
+                                            _filledField(
+                                              controller: jalanController,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _fieldLabel('Kelurahan'),
+                                            _filledField(
+                                              controller: kelurahanaController,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _fieldLabel('Kecamatan'),
+                                            _filledField(
+                                              controller: kecamatanController,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _fieldLabel('Kota'),
+                                            _filledField(
+                                              controller: kotaController,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _fieldLabel('Provinsi'),
+                                            _filledField(
+                                              controller: provinsiController,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _fieldLabel('Nomer Rekening'),
+                                            _filledField(
+                                              controller:
+                                                  nomerRekeningController,
+                                              keyboardType:
+                                                  TextInputType.number,
+                                            ),
+                                            const SizedBox(height: 12),
+                                            _fieldLabel('Nama Bank'),
+                                            _filledField(
+                                              controller: namaBankController,
+                                            ),
+                                            const SizedBox(height: 24),
+                                            SizedBox(
+                                              width: double.infinity,
+                                              child: ElevatedButton(
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor: kGreenDark,
+                                                  foregroundColor: Colors.white,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        vertical: 14,
+                                                      ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
+                                                  ),
+                                                ),
+                                                onPressed: _isLoading
+                                                    ? null
+                                                    : _saveProfile,
+                                                child: _isLoading
+                                                    ? const SizedBox(
+                                                        height: 20,
+                                                        width: 20,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                              color:
+                                                                  Colors.white,
+                                                              strokeWidth: 2,
+                                                            ),
+                                                      )
+                                                    : const Text(
+                                                        'Simpan Perubahan',
+                                                        style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                        ),
+                                                      ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ),
+                                      Positioned(
+                                        top: -10,
+                                        left: 0,
+                                        right: 0,
+                                        child: Center(
+                                          child: Stack(
+                                            children: [
+                                              CircleAvatar(
+                                                radius: 42,
+                                                backgroundColor: kCream,
+                                                child: CircleAvatar(
+                                                  radius: 38,
+                                                  backgroundImage:
+                                                      backgroundImage,
+                                                ),
+                                              ),
+                                              Positioned(
+                                                bottom: 0,
+                                                right: 0,
+                                                child: InkWell(
+                                                  onTap: _pickImage,
+                                                  child: Container(
+                                                    padding:
+                                                        const EdgeInsets.all(6),
+                                                    decoration: BoxDecoration(
+                                                      color: kGreenDark,
+                                                      shape: BoxShape.circle,
+                                                      border: Border.all(
+                                                        color: Colors.white,
+                                                        width: 2,
+                                                      ),
+                                                    ),
+                                                    child: const Icon(
+                                                      Icons.camera_alt,
+                                                      color: Colors.white,
+                                                      size: 18,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ],
+                        );
+                      },
+                    ),
                   ),
-                ),
+
+                  const SafeArea(top: false, child: SizedBox(height: 12)),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -435,16 +458,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _filledField({
     required TextEditingController controller,
     TextInputType? keyboardType,
-    bool obscure = false,
-    int maxLines = 1,
     bool isReadOnly = false,
-    String? hint,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
-      obscureText: obscure,
-      maxLines: maxLines,
       readOnly: isReadOnly,
       decoration: InputDecoration(
         isDense: true,
@@ -452,8 +470,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
         fillColor: isReadOnly
             ? Colors.grey.shade300
             : Colors.white.withOpacity(0.6),
-        hintText: hint ?? '',
-        hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,
