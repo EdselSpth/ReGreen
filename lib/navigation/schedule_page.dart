@@ -119,15 +119,15 @@ class _ScheduleCard extends StatelessWidget {
                 Text(
                   item.courierName,
                   style: const TextStyle(
-                    fontSize: 18, // lebih besar
-                    fontWeight: FontWeight.bold, // bold
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold, 
                   ),
                 ),
                 const SizedBox(height: 6),
                 Text(
                   item.alamat,
                   style: const TextStyle(
-                    fontSize: 16, // lebih besar
+                    fontSize: 16, 
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
                   ),
@@ -211,7 +211,7 @@ class _ScheduleCard extends StatelessWidget {
       child: Text(
         status.toUpperCase(),
         style: TextStyle(
-          fontSize: 14, // lebih besar
+          fontSize: 14,
           color: color,
           fontWeight: FontWeight.bold,
         ),

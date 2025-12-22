@@ -130,7 +130,7 @@ class _InfoCard extends StatelessWidget {
           const SizedBox(height: 8),
           _row(Icons.delete, 'Jenis Sampah', penjemputan.wasteTypes),
           const SizedBox(height: 16),
-          // Status dengan badge
+          // Status
           Center(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
