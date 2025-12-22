@@ -35,7 +35,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
   }
 
   // =========================
-  // LOAD & VALIDATE PROFILE
+  // LOAD PROFILE & VALIDASI
   // =========================
   Future<void> _loadProfileAddress() async {
     _dialogShown = false;
@@ -65,7 +65,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
       return;
     }
 
-    // ✅ ALAMAT LENGKAP → ISI FIELD READ ONLY
+    // ✅ ALAMAT LENGKAP → ISI FIELD
     jalanCtrl.text = profile['jalan'];
     kelurahanCtrl.text = profile['kelurahan'];
     kecamatanCtrl.text = profile['kecamatan'];
@@ -134,13 +134,11 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
         backgroundColor: const Color(0xFF5C8E3E),
       ),
       backgroundColor: const Color(0xFFEFF3E8),
-
-      // ⬅️ FORM TIDAK MUNCUL SAMA SEKALI JIKA ALAMAT KOSONG
-      body: hasAddressProfile ? _buildForm(context) : _buildNeedProfile(),
+      body: hasAddressProfile ? _buildForm() : _buildNeedProfile(),
     );
   }
 
-  Widget _buildForm(BuildContext context) {
+  Widget _buildForm() {
     final uid = FirebaseAuth.instance.currentUser!.uid;
 
     return StreamBuilder<DocumentSnapshot>(
@@ -226,7 +224,9 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
                   context,
                   MaterialPageRoute(builder: (_) => const EditProfilePage()),
                 );
-                _loadProfileAddress(); // 🔁 reload setelah edit
+
+                // 🔥 KUNCI UTAMA: reload setelah edit profile
+                await _loadProfileAddress();
               },
               child: const Text('Lengkapi Profil'),
             ),
@@ -237,7 +237,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
   }
 
   // =========================
-  // DIALOG
+  // ALERT
   // =========================
   void _showAddressRequiredDialog() {
     showDialog(
@@ -255,12 +255,16 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
               child: const Text('Batal'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(context);
-                Navigator.push(
+
+                await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const EditProfilePage()),
                 );
+
+                // 🔥 WAJIB reload setelah balik
+                await _loadProfileAddress();
               },
               child: const Text('Ke Edit Profil'),
             ),
@@ -271,7 +275,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
   }
 
   // =========================
-  // HELPERS
+  // HELPER
   // =========================
   Widget _statusInfo(AreaStatus status) {
     switch (status) {
