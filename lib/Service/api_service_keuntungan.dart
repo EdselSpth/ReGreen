@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiServiceKeuntungan {
-  // Gunakan 10.0.2.2 untuk emulator Android, atau IP asli PC jika pakai HP fisik
   static const String baseUrl = "http://10.0.2.2:3000/api/keuntungan";
 
   static Future<bool> tarikKeuntungan({
@@ -24,7 +23,6 @@ class ApiServiceKeuntungan {
           "metode": metode,
         }),
       );
-
       return response.statusCode == 201;
     } catch (e) {
       print("Error POST Keuntungan: $e");
@@ -32,18 +30,15 @@ class ApiServiceKeuntungan {
     }
   }
 
-  static Future<List<dynamic>> getStatusUser(String firebaseUid) async {
+  // PASTIKAN BAGIAN INI ADA PARAMETER DALAM KURUNG KURAWAL {}
+  static Future<List<dynamic>> getStatusUser(String firebaseUid, {int page = 1, int limit = 10}) async {
     try {
       final response = await http.get(
-        Uri.parse("$baseUrl/user/$firebaseUid"),
+        Uri.parse("$baseUrl/user/$firebaseUid?page=$page&limit=$limit"),
       );
-
-      print("Response Body: ${response.body}"); // Debugging
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        
-        // Mengambil array dari dalam properti 'data' sesuai struktur backend baru
         if (jsonResponse.containsKey('data') && jsonResponse['data'] != null) {
           return jsonResponse['data'] as List<dynamic>;
         }
