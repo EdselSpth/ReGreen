@@ -26,6 +26,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
 
   bool isLoading = true;
   bool hasAddressProfile = false;
+  bool _dialogShown = false;
 
   @override
   void initState() {
@@ -33,23 +34,43 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     _loadProfileAddress();
   }
 
+  // =========================
+  // LOAD & VALIDATE PROFILE
+  // =========================
   Future<void> _loadProfileAddress() async {
-    final profile = await UserService.getCurrentUserProfile();
-    final address = profile?['address'];
+    _dialogShown = false;
 
-    if (address == null) {
+    final profile = await UserService.getCurrentUserProfile();
+
+    final bool alamatTidakLengkap =
+        profile == null ||
+        (profile['jalan'] ?? '').toString().isEmpty ||
+        (profile['kelurahan'] ?? '').toString().isEmpty ||
+        (profile['kecamatan'] ?? '').toString().isEmpty ||
+        (profile['kota'] ?? '').toString().isEmpty ||
+        (profile['provinsi'] ?? '').toString().isEmpty;
+
+    if (alamatTidakLengkap) {
       setState(() {
         hasAddressProfile = false;
         isLoading = false;
       });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!_dialogShown) {
+          _dialogShown = true;
+          _showAddressRequiredDialog();
+        }
+      });
       return;
     }
 
-    jalanCtrl.text = address['jalan'] ?? '';
-    kelurahanCtrl.text = address['kelurahan'] ?? '';
-    kecamatanCtrl.text = address['kecamatan'] ?? '';
-    kotaCtrl.text = address['kota'] ?? '';
-    provinsiCtrl.text = address['provinsi'] ?? '';
+    // ✅ ALAMAT LENGKAP → ISI FIELD READ ONLY
+    jalanCtrl.text = profile['jalan'];
+    kelurahanCtrl.text = profile['kelurahan'];
+    kecamatanCtrl.text = profile['kecamatan'];
+    kotaCtrl.text = profile['kota'];
+    provinsiCtrl.text = profile['provinsi'];
 
     setState(() {
       hasAddressProfile = true;
@@ -57,6 +78,9 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     });
   }
 
+  // =========================
+  // SUBMIT AREA
+  // =========================
   Future<void> _submitArea() async {
     setState(() => isLoading = true);
 
@@ -95,6 +119,9 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     setState(() => isLoading = false);
   }
 
+  // =========================
+  // UI
+  // =========================
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -107,9 +134,9 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
         backgroundColor: const Color(0xFF5C8E3E),
       ),
       backgroundColor: const Color(0xFFEFF3E8),
-      body: hasAddressProfile
-          ? _buildForm(context)
-          : _buildNeedProfileAddress(context),
+
+      // ⬅️ FORM TIDAK MUNCUL SAMA SEKALI JIKA ALAMAT KOSONG
+      body: hasAddressProfile ? _buildForm(context) : _buildNeedProfile(),
     );
   }
 
@@ -174,7 +201,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     );
   }
 
-  Widget _buildNeedProfileAddress(BuildContext context) {
+  Widget _buildNeedProfile() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -194,11 +221,12 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
                 backgroundColor: const Color(0xFF5C8E3E),
                 foregroundColor: Colors.white,
               ),
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const EditProfilePage()),
                 );
+                _loadProfileAddress(); // 🔁 reload setelah edit
               },
               child: const Text('Lengkapi Profil'),
             ),
@@ -208,6 +236,43 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     );
   }
 
+  // =========================
+  // DIALOG
+  // =========================
+  void _showAddressRequiredDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Alamat Belum Lengkap'),
+          content: const Text(
+            'Masukkan alamat di profil terlebih dahulu untuk mendaftarkan area.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const EditProfilePage()),
+                );
+              },
+              child: const Text('Ke Edit Profil'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // =========================
+  // HELPERS
+  // =========================
   Widget _statusInfo(AreaStatus status) {
     switch (status) {
       case AreaStatus.pending:
