@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:regreen/navigation/main_screen.dart';
 import 'package:regreen/auth/register_screen.dart';
 import 'package:regreen/widget/custom_textfeld.dart';
@@ -68,71 +67,61 @@ class _LoginScreenState extends State<LoginScreen> {
       _isLoading = true;
     });
 
-    try {
-      await _authService.login(email: email, password: password);
+    final result = await _authService.login(email: email, password: password);
 
+    if (result.isSuccess && _rememberMe) {
       final pref = await SharedPreferences.getInstance();
-      if (_rememberMe) {
-        await pref.setBool('remember_me', true);
-        await pref.setString('saved_email', email);
-      } else {
-        await pref.remove('remember_me');
-        await pref.remove('saved_email');
-      }
+      await pref.setBool('remember_me', true);
+      await pref.setString('saved_email', email);
+    } else if (!_rememberMe) {
+      final pref = await SharedPreferences.getInstance();
+      await pref.remove('remember_me');
+      await pref.remove('saved_email');
+    }
 
-      if (!mounted) return;
+    if (!mounted) return;
 
+    if (result.isSuccess) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const MainScreen()),
       );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'email-not-verified') {
-        await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text("Email belum terverifikasi"),
-            content: const Text(
-              "Kamu belum verifikasi email. \n\n Silahkan cek inbox email kamu (atau folder spam) untuk verifikasi",
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("OK"),
-              ),
-            ],
+    } else {
+      if (result.errorCode == 'email-not-verified') {
+        _showVerificationDialog();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result.errorMessage ?? 'Gagal login'),
+            backgroundColor: Colors.red,
           ),
         );
       }
-
-      String message;
-      if (e.code == 'user-not-found') {
-        message = 'Tidak ada pengguna yang terdaftar dengan email ini.';
-      } else if (e.code == 'wrong-password') {
-        message = 'Password salah.';
-      } else if (e.code == 'invalid-credential') {
-        message = 'Email atau password salah.';
-      } else {
-        message = 'Gagal login. Periksa koneksi atau kredensial Anda.';
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message), backgroundColor: Colors.red),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Login gagal: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
     }
+
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _showVerificationDialog() async {
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Email belum terverifikasi"),
+        content: const Text(
+          "Kamu belum verifikasi email. \n\n Silahkan cek inbox email kamu (atau folder spam) untuk verifikasi",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -173,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 32),
                 CustomTextField(
                   controller: _emailController,
-                  hintText: 'Email', // Diperbarui menjadi Email
+                  hintText: 'Email',
                 ),
                 const SizedBox(height: 16),
                 CustomTextField(
