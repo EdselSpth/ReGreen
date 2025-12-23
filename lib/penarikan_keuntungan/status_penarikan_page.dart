@@ -184,7 +184,7 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
                                     ),
                                     decoration: BoxDecoration(
                                       color: (statusStyle['color'] as Color)
-                                          .withOpacity(0.1),
+                                          .withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Row(
