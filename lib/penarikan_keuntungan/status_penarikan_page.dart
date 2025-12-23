@@ -20,9 +20,8 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
   @override
   void initState() {
     super.initState();
-    _fetchData(refresh: true); // Ambil data pertama kali
+    _fetchData(refresh: true);
 
-    // Logika Pagination: Ambil data tambahan saat scroll mendekati bawah
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 200 &&
@@ -55,7 +54,6 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
           isLoading = false;
           if (refresh) {
             listStatus = newData;
-            // Jika data baru lebih kecil dari limit, maka tidak ada lagi data selanjutnya
             hasMore = newData.length == 10;
             currentPage = 2;
           } else {
@@ -64,7 +62,6 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
             } else {
               listStatus.addAll(newData);
               currentPage++;
-              // Jika data yang baru saja diambil kurang dari 10, matikan hasMore
               if (newData.length < 10) hasMore = false;
             }
           }
@@ -82,7 +79,6 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
     super.dispose();
   }
 
-  // Fungsi helper untuk format status
   Map<String, dynamic> _getStatusStyle(String? status) {
     switch (status?.toLowerCase()) {
       case 'diterima':
@@ -98,9 +94,18 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Riwayat Penarikan"),
+        title: const Text(
+          "Riwayat Penarikan",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600, // Agak bold
+            fontSize: 18,
+          ),
+        ),
+        centerTitle: true, // Membuat teks ke tengah
         backgroundColor: const Color(0xFF558B3E),
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white), // Panah back putih
       ),
       body: RefreshIndicator(
         onRefresh: () => _fetchData(refresh: true),

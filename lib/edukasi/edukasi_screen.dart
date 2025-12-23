@@ -53,7 +53,6 @@ class EdukasiScreen extends StatelessWidget {
               ),
               const SizedBox(height: 30),
 
-              // Tombol Artikel
               _buildMenuCard(
                 icon: Icons.article_rounded,
                 title: 'Artikel Edukasi Daur Ulang',
@@ -69,7 +68,6 @@ class EdukasiScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Tombol Video
               _buildMenuCard(
                 icon: Icons.play_circle_fill_rounded,
                 title: 'Video Edukasi Singkat',

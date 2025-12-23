@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiServiceKeuntungan {
-  // Gunakan 10.0.2.2 untuk emulator Android, atau IP asli PC jika pakai HP fisik
   static const String baseUrl = "http://10.0.2.2:3000/api/keuntungan";
 
   /// Fungsi untuk mengajukan penarikan baru
