@@ -134,7 +134,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
         backgroundColor: const Color(0xFF5C8E3E),
       ),
       backgroundColor: const Color(0xFFEFF3E8),
-      body: alamatLengkap ? buildForm() : buildNeedProfile(),
+      body: alamatLengkap ? buildForm() : _buildNeedProfile(),
     );
   }
 
@@ -197,30 +197,67 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     );
   }
 
-  Widget buildNeedProfile() {
+  Widget _buildNeedProfile() {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.location_off, size: 72, color: Colors.grey),
-            const SizedBox(height: 16),
+            // 🔥 ICON HIJAU
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF5C8E3E).withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.location_off,
+                size: 64,
+                color: Color(0xFF5C8E3E),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
             const Text(
               'Lengkapi alamat pada profil terlebih dahulu',
               textAlign: TextAlign.center,
-              style: TextStyle(fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const EditProfilePage()),
-                );
-                await loadAlamatProfil();
-              },
-              child: const Text('Lengkapi Profil'),
+
+            const SizedBox(height: 24),
+
+            // 🔥 BUTTON HIJAU (TIDAK PLAIN)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.edit_location_alt),
+                label: const Text(
+                  'Lengkapi Profil',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5C8E3E),
+                  foregroundColor: Colors.white,
+                  elevation: 3,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditProfilePage()),
+                  );
+                  await loadAlamatProfil(); // 🔁 reload setelah edit
+                },
+              ),
             ),
           ],
         ),
