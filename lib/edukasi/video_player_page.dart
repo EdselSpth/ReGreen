@@ -36,9 +36,9 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
       flags: const YoutubePlayerFlags(
         autoPlay: true,
         enableCaption: true,
-        forceHD: true,
+        forceHD: false,
       ),
-    );
+    )..setVolume(100);
   }
 
   @override
@@ -89,7 +89,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      /// ===== TITLE =====
                       Text(
                         currentTitle,
                         style: const TextStyle(
@@ -100,7 +99,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
 
                       const SizedBox(height: 8),
 
-                      /// ===== TAG =====
                       Wrap(
                         spacing: 8,
                         children: const [
@@ -111,7 +109,6 @@ class _VideoPlayerPageState extends State<VideoPlayerPage> {
                       ),
                       const SizedBox(height: 16),
 
-                      /// ===== DESCRIPTION =====
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(

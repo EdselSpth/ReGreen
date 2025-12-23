@@ -75,7 +75,6 @@ class ArtikelPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header Image (Static / Placeholder)
                         ClipRRect(
                           borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(16),
@@ -94,7 +93,6 @@ class ArtikelPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Metadata
                               Row(
                                 children: const [
                                   Icon(Icons.picture_as_pdf,
@@ -113,7 +111,6 @@ class ArtikelPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 10),
 
-                              // Title
                               Text(
                                 article['nama_artikel'],
                                 style: const TextStyle(
@@ -124,7 +121,6 @@ class ArtikelPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 12),
 
-                              // Action
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: const [
