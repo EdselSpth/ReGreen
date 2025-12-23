@@ -169,8 +169,7 @@ class _HomePageState extends State<HomePage> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (_) =>
-                                          const SchedulePage(),
+                                      builder: (_) => const SchedulePage(),
                                     ),
                                   );
                                 },
@@ -179,7 +178,7 @@ class _HomePageState extends State<HomePage> {
                           ],
                         ),
 
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 2),
                         StreamBuilder<DocumentSnapshot>(
                           stream: FirebaseFirestore.instance
                               .collection('users')
