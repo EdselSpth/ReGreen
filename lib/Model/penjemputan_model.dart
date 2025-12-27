@@ -33,7 +33,7 @@ class Penjemputan {
     return Penjemputan(
       id: documentId,
       alamat: data['alamat'] ?? '',
-      courierName: data['courierName'] ?? '',
+      courierName: data['courier_name'] ?? data['courierName'] ?? '',
       tanggal: parsedDate,
       status: data['status'] ?? '',
       time: data['time'] ?? '',
