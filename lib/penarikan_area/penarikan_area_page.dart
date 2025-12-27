@@ -50,14 +50,17 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
 
     final profile = await UserService.getCurrentUserProfile();
 
+    final addressMap = profile != null && profile['address'] is Map
+        ? profile['address'] as Map<String, dynamic>
+        : {};
+
     final bool alamatTidakLengkap =
         profile == null ||
-        (profile['jalan'] ?? '').toString().trim().isEmpty ||
-        (profile['kelurahan'] ?? '').toString().trim().isEmpty ||
-        (profile['kecamatan'] ?? '').toString().trim().isEmpty ||
-        (profile['kota'] ?? '').toString().trim().isEmpty ||
-        (profile['provinsi'] ?? '').toString().trim().isEmpty;
-
+        (addressMap['jalan'] ?? '').toString().trim().isEmpty ||
+        (addressMap['kelurahan'] ?? '').toString().trim().isEmpty ||
+        (addressMap['kecamatan'] ?? '').toString().trim().isEmpty ||
+        (addressMap['kota'] ?? '').toString().trim().isEmpty ||
+        (addressMap['provinsi'] ?? '').toString().trim().isEmpty;
     if (alamatTidakLengkap) {
       setState(() {
         alamatLengkap = false;
@@ -73,11 +76,11 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
       return;
     }
 
-    jalanController.text = profile['jalan'];
-    kelurahanController.text = profile['kelurahan'];
-    kecamatanController.text = profile['kecamatan'];
-    kotaController.text = profile['kota'];
-    provinsiController.text = profile['provinsi'];
+    jalanController.text = addressMap['jalan'] ?? '';
+    kelurahanController.text = addressMap['kelurahan'] ?? '';
+    kecamatanController.text = addressMap['kecamatan'] ?? '';
+    kotaController.text = addressMap['kota'] ?? '';
+    provinsiController.text = addressMap['provinsi'] ?? '';
 
     setState(() {
       alamatLengkap = true;
