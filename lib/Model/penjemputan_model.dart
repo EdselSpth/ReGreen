@@ -26,6 +26,12 @@ class Penjemputan {
 
     if (data['date'] is Timestamp) {
       parsedDate = (data['date'] as Timestamp).toDate();
+    } else if (data['date'] is String) {
+      try {
+        parsedDate = DateTime.parse(data['date']);
+      } catch (e) {
+        parsedDate = DateTime.now();
+      }
     } else {
       parsedDate = DateTime.now();
     }
@@ -37,7 +43,7 @@ class Penjemputan {
       tanggal: parsedDate,
       status: data['status'] ?? '',
       time: data['time'] ?? '',
-      wasteTypes: data['wasteTypes'] ?? '',
+      wasteTypes: data['waste_type'] ?? data['wasteTypes'] ?? ' ',
       userId: data['userId'],
     );
   }
