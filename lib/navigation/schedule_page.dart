@@ -133,7 +133,10 @@ class _ScheduleCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.courierName,
+                  // LOGIKA BARU: Kalau kosong, tulis 'Menunggu Kurir'
+                  (item.courierName.isEmpty)
+                      ? 'Menunggu Kurir'
+                      : item.courierName,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
