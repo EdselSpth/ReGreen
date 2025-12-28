@@ -23,9 +23,7 @@ class _SchedulePageState extends State<SchedulePage> {
   StreamSubscription<DocumentSnapshot>? _userSub;
   bool _autoScheduleTriggered = false;
   String? _userAreaId;
-  // ===============================
-  // 🔥 AUTOMATISASI (AMAN & STABIL)
-  // ===============================
+//otomatisasi jadwal
   @override
   void initState() {
     super.initState();
@@ -63,9 +61,6 @@ class _SchedulePageState extends State<SchedulePage> {
     super.dispose();
   }
 
-  // ===============================
-  // UI (TIDAK DIUBAH)
-  // ===============================
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,7 +100,7 @@ class _SchedulePageState extends State<SchedulePage> {
               }
 
               final list = snapshot.data ?? [];
-              // 🔹 Sort supaya jadwal area user berada di atas
+            
               if (_userAreaId != null) {
                 list.sort((a, b) {
                   if (a.areaId == _userAreaId && b.areaId != _userAreaId)
@@ -150,9 +145,6 @@ class _SchedulePageState extends State<SchedulePage> {
   }
 }
 
-// ===============================
-// CARD (TIDAK DIUBAH)
-// ===============================
 class _ScheduleCard extends StatelessWidget {
   final Penjemputan item;
   const _ScheduleCard({required this.item});
