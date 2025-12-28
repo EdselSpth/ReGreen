@@ -139,7 +139,7 @@ class _ScheduleCard extends StatelessWidget {
                       : item.courierName,
                   style: const TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold, 
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 6),
