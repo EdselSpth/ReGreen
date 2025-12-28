@@ -9,6 +9,7 @@ class Penjemputan {
   final String time;
   final String wasteTypes;
   final String? userId;
+  final String? areaId;
 
   Penjemputan({
     required this.id,
@@ -19,6 +20,7 @@ class Penjemputan {
     required this.time,
     required this.wasteTypes,
     required this.userId,
+    required this.areaId,
   });
 
   factory Penjemputan.fromMap(Map<String, dynamic> data, String documentId) {
@@ -35,16 +37,35 @@ class Penjemputan {
     } else {
       parsedDate = DateTime.now();
     }
+    String alamatString = '';
+    final alamatData = data['alamat'];
+    if (alamatData != null && alamatData is Map<String, dynamic>) {
+      final jalan = alamatData['jalan'] ?? '';
+      final kelurahan = alamatData['kelurahan'] ?? '';
+      final kecamatan = alamatData['kecamatan'] ?? '';
+      final kota = alamatData['kota'] ?? '';
+      final provinsi = alamatData['provinsi'] ?? '';
 
+      alamatString = [
+        jalan,
+        kelurahan,
+        kecamatan,
+        kota,
+        provinsi,
+      ].where((s) => s.isNotEmpty).join(', ');
+    } else if (alamatData is String) {
+      alamatString = alamatData;
+    }
     return Penjemputan(
       id: documentId,
-      alamat: data['alamat'] ?? '',
+      alamat: alamatString,
       courierName: data['courier_name'] ?? data['courierName'] ?? '',
       tanggal: parsedDate,
       status: data['status'] ?? '',
       time: data['time'] ?? '',
       wasteTypes: data['waste_type'] ?? data['wasteTypes'] ?? ' ',
       userId: data['userId'],
+      areaId: data['areaId'],
     );
   }
 }
