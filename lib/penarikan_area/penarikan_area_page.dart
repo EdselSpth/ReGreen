@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import 'package:regreen/navigation/edit_profile_page.dart';
 import '../Model/area_model.dart';
 import '../Model/area_status.dart';
 import '../Service/area_service.dart';
 import '../Service/user_service.dart';
+import '../navigation/edit_profile_page.dart';
 
 class PendaftaranAreaPage extends StatefulWidget {
   const PendaftaranAreaPage({super.key});
@@ -16,92 +16,94 @@ class PendaftaranAreaPage extends StatefulWidget {
 }
 
 class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
-  final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
-  final jalanCtrl = TextEditingController();
-  final kelurahanCtrl = TextEditingController();
-  final kecamatanCtrl = TextEditingController();
-  final kotaCtrl = TextEditingController();
-  final provinsiCtrl = TextEditingController();
+  final TextEditingController jalanController = TextEditingController();
+  final TextEditingController kelurahanController = TextEditingController();
+  final TextEditingController kecamatanController = TextEditingController();
+  final TextEditingController kotaController = TextEditingController();
+  final TextEditingController provinsiController = TextEditingController();
 
   bool isLoading = true;
-  bool hasAddressProfile = false;
-  bool _dialogShown = false;
+  bool alamatLengkap = false;
+  bool dialogSudahMuncul = false;
 
   @override
   void initState() {
     super.initState();
-    _loadProfileAddress();
+    loadAlamatProfil();
   }
 
   @override
   void dispose() {
-    jalanCtrl.dispose();
-    kelurahanCtrl.dispose();
-    kecamatanCtrl.dispose();
-    kotaCtrl.dispose();
-    provinsiCtrl.dispose();
+    jalanController.dispose();
+    kelurahanController.dispose();
+    kecamatanController.dispose();
+    kotaController.dispose();
+    provinsiController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadProfileAddress() async {
-    _dialogShown = false;
+  //load alamat profil
+  Future<void> loadAlamatProfil() async {
+    dialogSudahMuncul = false;
 
     final profile = await UserService.getCurrentUserProfile();
-    final address = profile?['address'];
+
+    final addressMap = profile != null && profile['address'] is Map
+        ? profile['address'] as Map<String, dynamic>
+        : {};
 
     final bool alamatTidakLengkap =
         profile == null ||
-        address == null ||
-        (address['jalan'] ?? '').toString().trim().isEmpty ||
-        (address['kelurahan'] ?? '').toString().trim().isEmpty ||
-        (address['kecamatan'] ?? '').toString().trim().isEmpty ||
-        (address['kota'] ?? '').toString().trim().isEmpty ||
-        (address['provinsi'] ?? '').toString().trim().isEmpty;
-
+        (addressMap['jalan'] ?? '').toString().trim().isEmpty ||
+        (addressMap['kelurahan'] ?? '').toString().trim().isEmpty ||
+        (addressMap['kecamatan'] ?? '').toString().trim().isEmpty ||
+        (addressMap['kota'] ?? '').toString().trim().isEmpty ||
+        (addressMap['provinsi'] ?? '').toString().trim().isEmpty;
     if (alamatTidakLengkap) {
       setState(() {
-        hasAddressProfile = false;
+        alamatLengkap = false;
         isLoading = false;
       });
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!_dialogShown && mounted) {
-          _dialogShown = true;
-          _showAddressRequiredDialog();
+        if (!dialogSudahMuncul && mounted) {
+          dialogSudahMuncul = true;
+          tampilkanDialogAlamat();
         }
       });
       return;
     }
 
-    // ✅ ISI DARI MAP address
-    jalanCtrl.text = address['jalan'];
-    kelurahanCtrl.text = address['kelurahan'];
-    kecamatanCtrl.text = address['kecamatan'];
-    kotaCtrl.text = address['kota'];
-    provinsiCtrl.text = address['provinsi'];
+    jalanController.text = addressMap['jalan'] ?? '';
+    kelurahanController.text = addressMap['kelurahan'] ?? '';
+    kecamatanController.text = addressMap['kecamatan'] ?? '';
+    kotaController.text = addressMap['kota'] ?? '';
+    provinsiController.text = addressMap['provinsi'] ?? '';
 
     setState(() {
-      hasAddressProfile = true;
+      alamatLengkap = true;
       isLoading = false;
     });
   }
 
-  Future<void> _submitArea() async {
+  //submit area
+  Future<void> submitArea() async {
     setState(() => isLoading = true);
 
-    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
 
-    final area = AreaModel(
-      jalan: jalanCtrl.text,
-      kelurahan: kelurahanCtrl.text,
-      kecamatan: kecamatanCtrl.text,
-      kota: kotaCtrl.text,
-      provinsi: provinsiCtrl.text,
+    final AreaModel area = AreaModel(
+      jalan: jalanController.text,
+      kelurahan: kelurahanController.text,
+      kecamatan: kecamatanController.text,
+      kota: kotaController.text,
+      provinsi: provinsiController.text,
     );
 
     try {
-      final areaId = await AreaService.createArea(area);
+      final String areaId = await AreaService.createArea(area);
 
       await FirebaseFirestore.instance.collection('users').doc(uid).update({
         'areaStatus': 'pending',
@@ -110,9 +112,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Area berhasil didaftarkan, menunggu verifikasi'),
-          ),
+          const SnackBar(content: Text('Area berhasil didaftarkan')),
         );
         Navigator.pop(context, true);
       }
@@ -137,12 +137,12 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
         backgroundColor: const Color(0xFF5C8E3E),
       ),
       backgroundColor: const Color(0xFFEFF3E8),
-      body: hasAddressProfile ? _buildForm() : _buildNeedProfile(),
+      body: alamatLengkap ? buildForm() : _buildNeedProfile(),
     );
   }
 
-  Widget _buildForm() {
-    final uid = FirebaseAuth.instance.currentUser!.uid;
+  Widget buildForm() {
+    final String uid = FirebaseAuth.instance.currentUser!.uid;
 
     return StreamBuilder<DocumentSnapshot>(
       stream: FirebaseFirestore.instance
@@ -154,9 +154,11 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
           return const Center(child: Text('Data user tidak ditemukan'));
         }
 
-        final data = snapshot.data!.data() as Map<String, dynamic>;
-        final status = areaStatusFromString(data['areaStatus']);
-        final canSubmit = status == AreaStatus.notRegistered;
+        final Map<String, dynamic> data =
+            snapshot.data!.data() as Map<String, dynamic>;
+
+        final AreaStatus status = areaStatusFromString(data['areaStatus']);
+        final bool bolehDaftar = status == AreaStatus.notRegistered;
 
         return Form(
           key: _formKey,
@@ -164,29 +166,25 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                _statusInfo(status),
+                infoStatus(status),
                 const SizedBox(height: 16),
 
-                _readOnlyField('Nama Jalan', jalanCtrl),
-                _readOnlyField('Kelurahan', kelurahanCtrl),
-                _readOnlyField('Kecamatan', kecamatanCtrl),
-                _readOnlyField('Kota', kotaCtrl),
-                _readOnlyField('Provinsi', provinsiCtrl),
+                fieldReadOnly('Jalan', jalanController),
+                fieldReadOnly('Kelurahan', kelurahanController),
+                fieldReadOnly('Kecamatan', kecamatanController),
+                fieldReadOnly('Kota', kotaController),
+                fieldReadOnly('Provinsi', provinsiController),
 
                 const SizedBox(height: 24),
 
-                if (canSubmit)
+                if (bolehDaftar)
                   SizedBox(
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: _submitArea,
+                      onPressed: submitArea,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF5C8E3E),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
                       ),
                       child: const Text(
                         'Daftarkan Area',
@@ -209,27 +207,60 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.location_off, size: 72, color: Colors.grey),
-            const SizedBox(height: 16),
-            const Text(
-              'Masukkan alamat di profil terlebih dahulu',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF5C8E3E),
-                foregroundColor: Colors.white,
+            // 🔥 ICON HIJAU
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: const Color(0xFF5C8E3E).withValues(alpha: 0.15),
+                shape: BoxShape.circle,
               ),
-              onPressed: () async {
-                await Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const EditProfilePage()),
-                );
-                await _loadProfileAddress(); // 🔥 reload
-              },
-              child: const Text('Lengkapi Profil'),
+              child: const Icon(
+                Icons.location_off,
+                size: 64,
+                color: Color(0xFF5C8E3E),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            const Text(
+              'Lengkapi alamat pada profil terlebih dahulu',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // 🔥 BUTTON HIJAU (TIDAK PLAIN)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.edit_location_alt),
+                label: const Text(
+                  'Lengkapi Profil',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5C8E3E),
+                  foregroundColor: Colors.white,
+                  elevation: 3,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const EditProfilePage()),
+                  );
+                  await loadAlamatProfil(); // 🔁 reload setelah edit
+                },
+              ),
             ),
           ],
         ),
@@ -237,15 +268,13 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     );
   }
 
-  void _showAddressRequiredDialog() {
+  void tampilkanDialogAlamat() {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (_) => AlertDialog(
         title: const Text('Alamat Belum Lengkap'),
-        content: const Text(
-          'Masukkan alamat di profil terlebih dahulu untuk mendaftarkan area.',
-        ),
+        content: const Text('Lengkapi alamat pada profil terlebih dahulu.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -258,37 +287,30 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
                 context,
                 MaterialPageRoute(builder: (_) => const EditProfilePage()),
               );
-              await _loadProfileAddress();
+              await loadAlamatProfil();
             },
-            child: const Text('Ke Edit Profil'),
+            child: const Text('Ke Profil'),
           ),
         ],
       ),
     );
   }
 
-  Widget _statusInfo(AreaStatus status) {
-    switch (status) {
-      case AreaStatus.pending:
-        return _infoBox(
-          'Area sedang diverifikasi.\nData tidak dapat diubah.',
-          Icons.hourglass_top,
-        );
-      case AreaStatus.approved:
-        return _infoBox(
-          'Area sudah disetujui.\nPendaftaran tidak dapat diubah.',
-          Icons.verified,
-        );
-      default:
-        return const SizedBox.shrink();
+  Widget infoStatus(AreaStatus status) {
+    if (status == AreaStatus.pending) {
+      return infoBox('Area sedang diverifikasi', Icons.hourglass_top);
     }
+    if (status == AreaStatus.approved) {
+      return infoBox('Area sudah disetujui', Icons.verified);
+    }
+    return const SizedBox.shrink();
   }
 
-  Widget _infoBox(String text, IconData icon) {
+  Widget infoBox(String text, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.orange.withOpacity(0.15),
+        color: Colors.orange.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -301,7 +323,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     );
   }
 
-  Widget _readOnlyField(String label, TextEditingController controller) {
+  Widget fieldReadOnly(String label, TextEditingController controller) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(

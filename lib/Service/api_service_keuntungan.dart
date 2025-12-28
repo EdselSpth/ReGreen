@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiServiceKeuntungan {
-  // Gunakan 10.0.2.2 untuk emulator Android, atau IP asli PC jika pakai HP fisik
   static const String baseUrl = "http://10.0.2.2:3000/api/keuntungan";
 
   /// Fungsi untuk mengajukan penarikan baru
@@ -34,7 +33,11 @@ class ApiServiceKeuntungan {
   }
 
   /// Fungsi untuk mengambil riwayat status dengan Pagination
-  static Future<List<dynamic>> getStatusUser(String firebaseUid, {int page = 1, int limit = 10}) async {
+  static Future<List<dynamic>> getStatusUser(
+    String firebaseUid, {
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
       final url = "$baseUrl/user/$firebaseUid?page=$page&limit=$limit";
       print("DEBUG: Request URL -> $url");
@@ -43,17 +46,19 @@ class ApiServiceKeuntungan {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        
+
         // Debugging untuk melihat struktur JSON asli dari backend
         print("DEBUG: Response Body -> ${response.body}");
 
         // Mengambil array dari dalam properti 'data'
         if (jsonResponse.containsKey('data') && jsonResponse['data'] != null) {
           List<dynamic> data = jsonResponse['data'] as List<dynamic>;
-          print("DEBUG: Berhasil mengambil ${data.length} data untuk page $page");
+          print(
+            "DEBUG: Berhasil mengambil ${data.length} data untuk page $page",
+          );
           return data;
         }
-        
+
         print("DEBUG: Key 'data' tidak ditemukan atau null");
         return [];
       } else {

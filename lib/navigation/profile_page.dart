@@ -5,10 +5,6 @@ import 'package:regreen/navigation/edit_profile_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:regreen/Service/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:regreen/navigation/main_screen.dart';
-// Pastikan import home_page.dart ada jika memang dibutuhkan di tempat lain,
-// tapi di file ini sepertinya tidak dipakai langsung.
-// import 'home_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -141,8 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
-      backgroundColor: ProfilePage.kGreenDark, // Warna Hijau Background
-      // --- PERUBAHAN UTAMA DI SINI (Menggunakan AppBar) ---
+      backgroundColor: ProfilePage.kGreenDark,
       appBar: AppBar(
         backgroundColor: ProfilePage.kGreenDark,
         elevation: 0,
@@ -155,27 +150,16 @@ class _ProfilePageState extends State<ProfilePage> {
             fontSize: 20,
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const MainScreen()),
-              (route) => false,
-            );
-          },
-        ),
       ),
 
-      // Body langsung Container lengkung (Tanpa Column header manual)
       body: Container(
         width: double.infinity,
-        height: double.infinity, // Paksa memenuhi sisa layar ke bawah
+        height: double.infinity,
         decoration: const BoxDecoration(
-          color: ProfilePage.kCream, // Warna Cream
+          color: ProfilePage.kCream,
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(40), // Lengkungan disamakan
-            topRight: Radius.circular(40),
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
           ),
         ),
         child: SingleChildScrollView(
@@ -183,7 +167,6 @@ class _ProfilePageState extends State<ProfilePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // --- ISI KONTEN ---
               Center(
                 child: Container(
                   width: 120,
