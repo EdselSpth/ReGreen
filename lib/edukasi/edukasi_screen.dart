@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:regreen/edukasi/artikel_page.dart';
 import 'package:regreen/edukasi/video_page.dart';
-import 'package:regreen/navigation/main_screen.dart';
 
 class EdukasiScreen extends StatelessWidget {
   const EdukasiScreen({super.key});
@@ -15,18 +14,8 @@ class EdukasiScreen extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: const Text(
-          'Edukasi Daur Ulang',
+          'Edukasi',
           style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (context) => const MainScreen()),
-              (route) => false,
-            );
-          },
         ),
       ),
       body: Container(
@@ -64,7 +53,6 @@ class EdukasiScreen extends StatelessWidget {
               ),
               const SizedBox(height: 30),
 
-              // Tombol Artikel
               _buildMenuCard(
                 icon: Icons.article_rounded,
                 title: 'Artikel Edukasi Daur Ulang',
@@ -80,7 +68,6 @@ class EdukasiScreen extends StatelessWidget {
 
               const SizedBox(height: 20),
 
-              // Tombol Video
               _buildMenuCard(
                 icon: Icons.play_circle_fill_rounded,
                 title: 'Video Edukasi Singkat',
@@ -112,7 +99,7 @@ class EdukasiScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

@@ -17,14 +17,17 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
   int currentPage = 1;
   final User? user = FirebaseAuth.instance.currentUser;
 
+  static const Color kGreenDark = Color(0xFF558B3E);
+  static const Color kCream = Color(0xFFE8EDDE);
+
   @override
   void initState() {
     super.initState();
-    _fetchData(refresh: true); // Ambil data pertama kali
+    _fetchData(refresh: true);
 
-    // Logika Pagination: Ambil data tambahan saat scroll mendekati bawah
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
           !isLoading &&
           hasMore) {
         _fetchData();
@@ -54,8 +57,7 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
           isLoading = false;
           if (refresh) {
             listStatus = newData;
-            // Jika data baru lebih kecil dari limit, maka tidak ada lagi data selanjutnya
-            hasMore = newData.length == 10; 
+            hasMore = newData.length == 10;
             currentPage = 2;
           } else {
             if (newData.isEmpty) {
@@ -63,7 +65,6 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
             } else {
               listStatus.addAll(newData);
               currentPage++;
-              // Jika data yang baru saja diambil kurang dari 10, matikan hasMore
               if (newData.length < 10) hasMore = false;
             }
           }
@@ -81,7 +82,6 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
     super.dispose();
   }
 
-  // Fungsi helper untuk format status
   Map<String, dynamic> _getStatusStyle(String? status) {
     switch (status?.toLowerCase()) {
       case 'diterima':
@@ -96,80 +96,132 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kGreenDark,
       appBar: AppBar(
-        title: const Text("Riwayat Penarikan"),
-        backgroundColor: const Color(0xFF558B3E),
+        title: const Text(
+          "Riwayat Penarikan",
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
+        centerTitle: true,
+        backgroundColor: kGreenDark,
         elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
-      body: RefreshIndicator(
-        onRefresh: () => _fetchData(refresh: true),
-        color: const Color(0xFF558B3E),
-        child: listStatus.isEmpty && !isLoading
-            ? ListView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: const [
-                  SizedBox(height: 250),
-                  Center(child: Text("Belum ada riwayat penarikan")),
-                  Center(child: Text("Tarik ke bawah untuk memuat", style: TextStyle(fontSize: 12, color: Colors.grey))),
-                ],
-              )
-            : ListView.builder(
-                controller: _scrollController,
-                physics: const AlwaysScrollableScrollPhysics(),
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                itemCount: listStatus.length,
-                itemBuilder: (context, index) {
-                  final item = listStatus[index];
-                  final statusStyle = _getStatusStyle(item['status']);
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          color: kCream,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+        ),
 
-                  return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: ClipRRect(
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32),
+          ),
+          child: RefreshIndicator(
+            onRefresh: () => _fetchData(refresh: true),
+            color: const Color(0xFF558B3E),
+            child: listStatus.isEmpty && !isLoading
+                ? ListView(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    children: const [
+                      SizedBox(height: 250),
+                      Center(child: Text("Belum ada riwayat penarikan")),
+                      Center(
+                        child: Text(
+                          "Tarik ke bawah untuk memuat",
+                          style: TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ),
+                    ],
+                  )
+                : ListView.builder(
+                    controller: _scrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    itemCount: listStatus.length,
+                    itemBuilder: (context, index) {
+                      final item = listStatus[index];
+                      final statusStyle = _getStatusStyle(item['status']);
+
+                      return Card(
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                "Rp ${item['nominal']}",
-                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: (statusStyle['color'] as Color).withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Row(
-                                  children: [
-                                    Icon(statusStyle['icon'], size: 14, color: statusStyle['color']),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      (item['status'] ?? 'PENDING').toString().toUpperCase(),
-                                      style: TextStyle(
-                                        color: statusStyle['color'],
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 11,
-                                      ),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Rp ${item['nominal']}",
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: (statusStyle['color'] as Color)
+                                          .withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          statusStyle['icon'],
+                                          size: 14,
+                                          color: statusStyle['color'],
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          (item['status'] ?? 'PENDING')
+                                              .toString()
+                                              .toUpperCase(),
+                                          style: TextStyle(
+                                            color: statusStyle['color'],
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 11,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
+                              const Divider(height: 24),
+                              _buildRowInfo("Metode", item['metode']),
+                              _buildRowInfo("Rekening", item['rekening']),
+                              _buildRowInfo("Nama", item['nama_pengguna']),
                             ],
                           ),
-                          const Divider(height: 24),
-                          _buildRowInfo("Metode", item['metode']),
-                          _buildRowInfo("Rekening", item['rekening']),
-                          _buildRowInfo("Nama", item['nama_pengguna']),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+                        ),
+                      );
+                    },
+                  ),
+          ),
+        ),
       ),
     );
   }
@@ -180,8 +232,14 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(color: Colors.black54, fontSize: 13)),
-          Text(value?.toString() ?? "-", style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.black54, fontSize: 13),
+          ),
+          Text(
+            value?.toString() ?? "-",
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          ),
         ],
       ),
     );

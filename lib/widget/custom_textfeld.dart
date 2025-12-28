@@ -53,7 +53,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                     _isPasswordVisible
                         ? Icons.visibility_outlined
                         : Icons.visibility_off_outlined,
-                    color: kGreenText.withOpacity(0.7),
+                    color: kGreenText.withValues(alpha: 0.7),
                   ),
                   onPressed: () {
                     setState(() {

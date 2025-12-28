@@ -7,13 +7,13 @@ class ScheduleService {
   Stream<List<Penjemputan>> getPenjemputanStream() {
     return _db
         .collection('penjemputan')
-        .orderBy('createdAt', descending: true)
+        // .orderBy('createdAt', descending: true)  <-- HAPUS ATAU KOMENTARI DULU
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Penjemputan.fromMap(doc.data(), doc.id))
-          .toList();
-    });
+          return snapshot.docs
+              .map((doc) => Penjemputan.fromMap(doc.data(), doc.id))
+              .toList();
+        });
   }
   Future<void> daftarPenjemputan({
     required String penjemputanId,
@@ -21,9 +21,6 @@ class ScheduleService {
   }) async {
     final ref = _db.collection('penjemputan').doc(penjemputanId);
 
-    await ref.update({
-      'userId': userId,
-      'status': 'menunggu',
-    });
+    await ref.update({'userId': userId, 'status': 'menunggu'});
   }
 }

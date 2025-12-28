@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:regreen/model/user_model.dart';
+import 'package:regreen/model/auth_result.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -43,7 +44,10 @@ class AuthService {
     }
   }
 
-  Future<User?> login({required String email, required String password}) async {
+  Future<AuthResult> login({
+    required String email,
+    required String password,
+  }) async {
     try {
       UserCredential result = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -55,16 +59,31 @@ class AuthService {
         if (!user.emailVerified) {
           await _auth.signOut();
 
-          throw FirebaseAuthException(
-            code: 'email-not-verified',
-            message: 'Email belum diverifikasi. cek inbox kamu!',
+          return AuthResult(
+            errorCode: 'email-not-verified',
+            errorMessage: 'Email belum diverifikasi. Cek inbox kamu!',
           );
         }
       }
 
-      return user;
-    } on FirebaseAuthException {
-      rethrow;
+      return AuthResult(user: user);
+    } on FirebaseAuthException catch (e) {
+      String message = '';
+
+      if (e.code == 'user-not-found') {
+        message = 'Tidak ada pengguna yang terdaftar dengan email ini.';
+      } else if (e.code == 'wrong-password') {
+        message = 'Password salah.';
+      } else if (e.code == 'invalid-credential') {
+        message = 'Email atau password salah.';
+      } else if (e.code == 'email-not-verified') {
+        message = 'Email belum diverifikasi.';
+      } else {
+        message =
+            e.message ?? 'Gagal login. Periksa koneksi atau kredensial Anda.';
+      }
+
+      return AuthResult(errorCode: e.code, errorMessage: message);
     } catch (e) {
       throw Exception('Login failed: $e');
     }
