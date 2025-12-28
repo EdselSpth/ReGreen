@@ -4,9 +4,6 @@ import '../Model/penjemputan_model.dart';
 class ScheduleService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // ===============================
-  // STREAM (TIDAK DIUBAH)
-  // ===============================
   Stream<List<Penjemputan>> getPenjemputanStream() {
     return _db.collection('penjemputan').snapshots().map((snapshot) {
       return snapshot.docs
@@ -15,9 +12,6 @@ class ScheduleService {
     });
   }
 
-  // ===============================
-  // DAFTAR (TIDAK DIUBAH)
-  // ===============================
   Future<void> daftarPenjemputan({
     required String penjemputanId,
     required String userId,
@@ -28,9 +22,6 @@ class ScheduleService {
     });
   }
 
-  // ===============================
-  // 🔥 OTOMATISASI FINAL (IDEMPOTENT)
-  // ===============================
   Future<void> autoCreateScheduleForApprovedUser({
     required String userId,
   }) async {
@@ -49,12 +40,10 @@ class ScheduleService {
 
     if (alamat == null || areaId == null) return;
 
-    // 📅 tanggal hari ini
     final now = DateTime.now();
     final dateString =
         "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
 
-    // 🔍 CEK DUPLIKASI (IDEMPOTENT)
     final existing = await _db
         .collection('penjemputan')
         .where('areaId', isEqualTo: areaId)
@@ -64,12 +53,10 @@ class ScheduleService {
     print('Dokumen existing: ${existing.docs.length}');
 
     if (existing.docs.isNotEmpty) {
-      // Sudah ada jadwal hari ini → hentikan
+      //debugging
       print('Jadwal untuk daerah ini sudah ada, tidak dibuat lagi');
       return;
     }
-
-    // ✅ BUAT JADWAL
     try {
       await _db.collection('penjemputan').add({
         'areaId': areaId,
