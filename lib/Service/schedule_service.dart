@@ -15,8 +15,6 @@ class ScheduleService {
               .toList();
         });
   }
-
-  /// USER DAFTAR PENJEMPUTAN
   Future<void> daftarPenjemputan({
     required String penjemputanId,
     required String userId,
