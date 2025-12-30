@@ -179,6 +179,10 @@ class _HomePageState extends State<HomePage> {
                         ),
 
                         const SizedBox(height: 2),
+
+                        // Banner Penolakan diletakkan di atas tombol daftar
+                        _rejectionBanner(),
+
                         StreamBuilder<DocumentSnapshot>(
                           stream: FirebaseFirestore.instance
                               .collection('users')
@@ -195,17 +199,17 @@ class _HomePageState extends State<HomePage> {
                             final status = areaStatusFromString(
                               data['areaStatus'],
                             );
-                            final kecamatan = address != null
-                                ? address['kecamatan']
-                                : null;
+
+                            String? kecamatan;
+                            if (address is Map) {
+                              kecamatan = address['kecamatan'];
+                            }
 
                             String title = '';
                             String desc = '';
                             bool showButton = false;
 
-                            if (status == AreaStatus.notRegistered ||
-                                address == null ||
-                                kecamatan == null) {
+                            if (status == AreaStatus.notRegistered) {
                               title = 'Areamu Belum Terdaftar?';
                               desc =
                                   'Ayo daftarkan sekarang agar sampahmu dijemput!';
@@ -217,7 +221,9 @@ class _HomePageState extends State<HomePage> {
                             } else if (status == AreaStatus.approved) {
                               title = 'Areamu Sudah Terdaftar 🎉';
                               desc =
-                                  'Area $kecamatan sudah aktif.\nKamu bisa langsung melakukan penjemputan.';
+                                  'Area ${kecamatan ?? ""} sudah aktif.\nKamu bisa langsung melakukan penjemputan.';
+                            } else {
+                              return const SizedBox();
                             }
 
                             return Container(
@@ -244,7 +250,6 @@ class _HomePageState extends State<HomePage> {
                                     textAlign: TextAlign.center,
                                     style: const TextStyle(fontSize: 13),
                                   ),
-
                                   if (showButton) ...[
                                     const SizedBox(height: 10),
                                     ElevatedButton(
@@ -261,8 +266,6 @@ class _HomePageState extends State<HomePage> {
                                                 const PendaftaranAreaPage(),
                                           ),
                                         );
-
-                                        // 🔥 BALIK → AUTO UPDATE VIA STREAM
                                         if (result == true) {
                                           setState(() {});
                                         }
@@ -293,7 +296,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  /// ===================== WIDGET =====================
+  /// ===================== WIDGETS =====================
 
   Widget _saldoCard() {
     return Container(
@@ -419,7 +422,7 @@ class _HomePageState extends State<HomePage> {
         final address = data['address'];
         final status = areaStatusFromString(data['areaStatus']);
 
-        if (address == null || address['kecamatan'] == null) {
+        if (address == null) {
           return _jadwalMessage('Lengkapi alamatmu terlebih dahulu');
         }
 
@@ -506,6 +509,72 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _rejectionBanner() {
+    return StreamBuilder<DocumentSnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData || !snapshot.data!.exists)
+          return const SizedBox();
+
+        final data = snapshot.data!.data() as Map<String, dynamic>;
+        final status = data['areaStatus'] ?? '';
+        final reason = data['rejectionReason'] as String? ?? '';
+
+        if (status == 'notRegistered' && reason.isNotEmpty) {
+          return Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 18),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: const Color(0xFFDDE7CC),
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.red.shade300, width: 1),
+            ),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Colors.red.shade100,
+                  child: const Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.red,
+                  ),
+                ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Pendaftaran Area Ditolak",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        reason,
+                        style: TextStyle(
+                          color: Colors.grey.shade700,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        return const SizedBox();
+      },
+    );
+  }
+
   Widget _actionButton({
     required IconData icon,
     required String label,
@@ -554,7 +623,6 @@ class _HomePageState extends State<HomePage> {
     final number = value.toString();
     final buffer = StringBuffer();
     int counter = 0;
-
     for (int i = number.length - 1; i >= 0; i--) {
       buffer.write(number[i]);
       counter++;

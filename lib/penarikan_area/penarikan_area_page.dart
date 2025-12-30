@@ -166,7 +166,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                infoStatus(status),
+                infoStatus(status, data['rejectionReason'] as String?),
                 const SizedBox(height: 16),
 
                 fieldReadOnly('Jalan', jalanController),
@@ -207,7 +207,6 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 🔥 ICON HIJAU
             Container(
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
@@ -234,8 +233,6 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
             ),
 
             const SizedBox(height: 24),
-
-            // 🔥 BUTTON HIJAU (TIDAK PLAIN)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
@@ -258,7 +255,7 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
                     context,
                     MaterialPageRoute(builder: (_) => const EditProfilePage()),
                   );
-                  await loadAlamatProfil(); // 🔁 reload setelah edit
+                  await loadAlamatProfil();
                 },
               ),
             ),
@@ -296,28 +293,44 @@ class _PendaftaranAreaPageState extends State<PendaftaranAreaPage> {
     );
   }
 
-  Widget infoStatus(AreaStatus status) {
+  Widget infoStatus(AreaStatus status, String? reason) {
     if (status == AreaStatus.pending) {
-      return infoBox('Area sedang diverifikasi', Icons.hourglass_top);
+      return infoBox(
+        'Area sedang diverifikasi',
+        Icons.hourglass_top,
+        Colors.orange,
+      );
     }
     if (status == AreaStatus.approved) {
-      return infoBox('Area sudah disetujui', Icons.verified);
+      return infoBox('Area sudah disetujui', Icons.verified, Colors.green);
+    }
+    if (status == AreaStatus.notRegistered &&
+        reason != null &&
+        reason.isNotEmpty) {
+      return infoBox('Pendaftaran Ditolak: $reason', Icons.cancel, Colors.red);
     }
     return const SizedBox.shrink();
   }
 
-  Widget infoBox(String text, IconData icon) {
+  Widget infoBox(String text, IconData icon, Color color) {
     return Container(
       padding: const EdgeInsets.all(12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.orange.withValues(alpha: 0.15),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withOpacity(0.3)),
       ),
       child: Row(
         children: [
-          Icon(icon, color: Colors.orange),
+          Icon(icon, color: color),
           const SizedBox(width: 12),
-          Expanded(child: Text(text)),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold),
+            ),
+          ),
         ],
       ),
     );
