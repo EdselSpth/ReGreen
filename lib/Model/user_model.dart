@@ -9,6 +9,7 @@ class UserModel {
   final String? address;
   final String? photoUrl;
   final DateTime? createdAt;
+  final String? rejectionReason;
 
   final AreaStatus areaStatus;
   final String? areaId;
@@ -20,6 +21,7 @@ class UserModel {
     this.phoneNumber,
     this.address,
     this.photoUrl,
+    this.rejectionReason,
     this.createdAt,
     this.areaStatus = AreaStatus.notRegistered,
     this.areaId,
@@ -38,6 +40,7 @@ class UserModel {
           : null,
       areaStatus: areaStatusFromString(map['areaStatus']),
       areaId: map['areaId'],
+      rejectionReason: map['rerejectionReason'] ?? '',
     );
   }
 
@@ -52,6 +55,7 @@ class UserModel {
       'createdAt': createdAt,
       'areaStatus': areaStatusToString(areaStatus),
       'areaId': areaId,
+      'rejectionReason': rejectionReason,
     };
   }
 }
