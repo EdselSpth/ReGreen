@@ -121,7 +121,6 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
             topRight: Radius.circular(32),
           ),
         ),
-
         child: ClipRRect(
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(32),
@@ -152,58 +151,36 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
                     itemBuilder: (context, index) {
                       final item = listStatus[index];
                       final statusStyle = _getStatusStyle(item['status']);
+                      final bool isRejected = item['status']?.toString().toLowerCase() == 'ditolak';
 
                       return Card(
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                        ),
+                        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         child: Padding(
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "Rp ${item['nominal']}",
-                                    style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                      vertical: 4,
-                                    ),
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                                     decoration: BoxDecoration(
-                                      color: (statusStyle['color'] as Color)
-                                          .withValues(alpha: 0.1),
+                                      color: (statusStyle['color'] as Color).withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Row(
                                       children: [
-                                        Icon(
-                                          statusStyle['icon'],
-                                          size: 14,
-                                          color: statusStyle['color'],
-                                        ),
+                                        Icon(statusStyle['icon'], size: 14, color: statusStyle['color']),
                                         const SizedBox(width: 4),
                                         Text(
-                                          (item['status'] ?? 'PENDING')
-                                              .toString()
-                                              .toUpperCase(),
-                                          style: TextStyle(
-                                            color: statusStyle['color'],
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 11,
-                                          ),
+                                          (item['status'] ?? 'PENDING').toString().toUpperCase(),
+                                          style: TextStyle(color: statusStyle['color'], fontWeight: FontWeight.bold, fontSize: 11),
                                         ),
                                       ],
                                     ),
@@ -214,6 +191,34 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
                               _buildRowInfo("Metode", item['metode']),
                               _buildRowInfo("Rekening", item['rekening']),
                               _buildRowInfo("Nama", item['nama_pengguna']),
+                              
+                              // MENAMPILKAN ALASAN JIKA DITOLAK
+                              if (isRejected && item['alasan_tolak'] != null) ...[
+                                const SizedBox(height: 12),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    borderRadius: BorderRadius.circular(8),
+                                    border: Border.all(color: Colors.red.shade100),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Text(
+                                        "Alasan Penolakan:",
+                                        style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        item['alasan_tolak'],
+                                        style: const TextStyle(color: Colors.black87, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ],
                           ),
                         ),
@@ -232,14 +237,8 @@ class _StatusPenarikanPageState extends State<StatusPenarikanPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            label,
-            style: const TextStyle(color: Colors.black54, fontSize: 13),
-          ),
-          Text(
-            value?.toString() ?? "-",
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-          ),
+          Text(label, style: const TextStyle(color: Colors.black54, fontSize: 13)),
+          Text(value?.toString() ?? "-", style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
         ],
       ),
     );
