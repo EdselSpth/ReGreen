@@ -56,8 +56,8 @@ flutter run
 
 ### Jalankan Backend dan WEB Admin
 ```
-Nyalakan XAMPP
-Buka PHP My Admin
+Nyalakan mysql dan apache di xampp/laragon
+Buka admin mysql
 Buat database ReGree
 git clone https://github.com/EdselSpth/ReGreen_Website.git
 cd ReGreen_Website
